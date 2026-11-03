@@ -1,97 +1,211 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-export interface BankDeposit {
-    id: string;
-    whoPaid: string;
-    amountPaid: number;
-    matchedToOrder: boolean;
-    dateReceived: string;
-}
+import PaymentDetailsDrawer from './components/PaymentDetailsDrawer';
+import PaymentsFilters, {
+    type PaymentStatusFilter,
+} from './components/PaymentsFilters';
+import PaymentsHeader from './components/PaymentsHeader';
+import PaymentsSummary from './components/PaymentsSummary';
+import PaymentsTable from './components/PaymentsTable';
+import { usePayments } from './hooks/usePayments';
 
-export default function MoneyComingInPage() {
-    const [deposits, setDeposits] = useState<BankDeposit[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+import type {
+    PaymentDateRange,
+    PaymentRecord,
+    PaymentSummary,
+} from './lib/payments.types';
 
-    useEffect(() => {
-        setDeposits([
-            { id: "DEP-1", whoPaid: "Sarah Jenkins", amountPaid: 1250.00, matchedToOrder: true, dateReceived: "14 June" },
-            { id: "DEP-2", whoPaid: "Thabo Molefe", amountPaid: 3400.00, matchedToOrder: false, dateReceived: "14 June" },
-            { id: "DEP-3", whoPaid: "Amina Desai", amountPaid: 850.50, matchedToOrder: true, dateReceived: "13 June" },
-        ]);
-        setLoading(false);
-    }, []);
+import {
+    downloadPaymentsCsv,
+    formatPaymentTotals,
+    isWithinDateRange,
+    paymentActivityDate,
+} from './lib/payments.utils';
 
-    if (loading) {
+export default function PaymentsPage() {
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>('ALL');
+    const [providerFilter, setProviderFilter] = useState('ALL');
+    const [dateRange, setDateRange] = useState<PaymentDateRange>('ALL');
+    const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
+
+    const {
+        payments,
+        loading,
+        refreshing,
+        error,
+        lastUpdated,
+        fetchPayments,
+        isAuthenticated,
+        isChecking,
+    } = usePayments();
+
+    const dateFilteredPayments = useMemo(
+        () => payments.filter((payment) => isWithinDateRange(payment, dateRange)),
+        [payments, dateRange],
+    );
+
+    const summary = useMemo<PaymentSummary>(() => {
+        const completed = dateFilteredPayments.filter(
+            (payment) => payment.status === 'COMPLETED',
+        );
+
+        const pending = dateFilteredPayments.filter(
+            (payment) => payment.status === 'PENDING',
+        );
+
+        return {
+            completedCount: completed.length,
+            failedCount: dateFilteredPayments.filter(
+                (payment) => payment.status === 'FAILED',
+            ).length,
+            completedValue: formatPaymentTotals(completed),
+            pendingValue: formatPaymentTotals(pending),
+        };
+    }, [dateFilteredPayments]);
+
+    const providers = useMemo(
+        () => Array.from(
+            new Set(
+                payments
+                    .map((payment) => payment.provider)
+                    .filter(Boolean),
+            ),
+        ).sort(),
+        [payments],
+    );
+
+    const filteredPayments = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return dateFilteredPayments
+            .filter((payment) => {
+                const searchable = [
+                    payment.id,
+                    payment.customerName,
+                    payment.customerEmail,
+                    payment.customerPhone,
+                    payment.order?.reference,
+                    payment.provider,
+                    payment.providerReference,
+                    payment.transactionReference,
+                    payment.paymentRequestId,
+                    payment.providerStatusMessage,
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase();
+
+                const matchesSearch = !query || searchable.includes(query);
+                const matchesStatus =
+                    statusFilter === 'ALL' || payment.status === statusFilter;
+                const matchesProvider =
+                    providerFilter === 'ALL' || payment.provider === providerFilter;
+
+                return matchesSearch && matchesStatus && matchesProvider;
+            })
+            .sort(
+                (a, b) =>
+                    new Date(paymentActivityDate(b)).getTime() -
+                    new Date(paymentActivityDate(a)).getTime(),
+            );
+    }, [dateFilteredPayments, search, statusFilter, providerFilter]);
+
+    const hasActiveFilters =
+        search.trim() !== '' ||
+        statusFilter !== 'ALL' ||
+        providerFilter !== 'ALL' ||
+        dateRange !== 'ALL';
+
+    function resetFilters() {
+        setSearch('');
+        setStatusFilter('ALL');
+        setProviderFilter('ALL');
+        setDateRange('ALL');
+    }
+
+    function exportPayments() {
+        downloadPaymentsCsv(filteredPayments);
+    }
+
+    if (isChecking || !isAuthenticated) {
         return (
-            <div className="flex justify-center items-center h-[60vh] text-slate-500 text-xs font-mono tracking-widest animate-pulse">
-                LOADING BANK STATEMENT STREAM...
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <p className="text-xs font-mono tracking-widest text-slate-500">
+                    CHECKING SESSION...
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-10">
-            
-            {/* Header Block */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/6 pb-6">
-                <div>
-                    <div className="text-[11px] font-bold uppercase text-indigo-400 tracking-widest mb-1.5">
-                        Bank Activity Stream
-                    </div>
-                    <h1 className="text-3xl font-black tracking-tight text-white">
-                        Money Coming In
-                    </h1>
-                    <p className="text-xs text-slate-400 mt-1">A direct look at the money clearing into your bank accounts.</p>
-                </div>
-            </div>
+        <div className="space-y-8">
+            <PaymentsHeader
+                loading={loading}
+                refreshing={refreshing}
+                error={error}
+                lastUpdated={lastUpdated}
+                filteredPayments={filteredPayments}
+                onRefresh={() => void fetchPayments()}
+                onExport={exportPayments}
+            />
 
-            {/* Table Panel */}
-            {deposits.length === 0 ? (
-                <div className="ph-glass-panel p-12 text-center border-dashed border-white/4">
-                    <p className="text-sm text-slate-400 font-mono">No bank payments spotted today yet.</p>
-                </div>
-            ) : (
-                <div className="ph-glass-panel p-6">
-                    <div className="overflow-x-auto rounded-xl border border-white/4">
-                        <table className="ph-ledger-table">
-                            <thead>
-                                <tr>
-                                    <th className="ph-ledger-th">Who Paid</th>
-                                    <th className="ph-ledger-th">Amount</th>
-                                    <th className="ph-ledger-th">Status</th>
-                                    <th className="ph-ledger-th text-right">Date Received</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {deposits.map((deposit) => (
-                                    <tr key={deposit.id} className="ph-ledger-tr">
-                                        <td className="ph-ledger-td font-semibold text-white">
-                                            {deposit.whoPaid}
-                                        </td>
-                                        <td className="ph-ledger-td font-mono text-slate-200 font-bold">
-                                            R {deposit.amountPaid.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className="ph-ledger-td">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                                                deposit.matchedToOrder 
-                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-                                                    : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                                            }`}>
-                                                {deposit.matchedToOrder ? '✓ Linked to Order' : '⚠️ Missing Order'}
-                                            </span>
-                                        </td>
-                                        <td className="ph-ledger-td font-mono text-xs text-slate-400 text-right">
-                                            {deposit.dateReceived}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {error && (
+                <div
+                    role="alert"
+                    className="flex flex-col justify-between gap-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.05] p-4 sm:flex-row sm:items-center"
+                >
+                    <div>
+                        <p className="text-sm font-semibold text-rose-300">
+                            We couldn't load payment records.
+                        </p>
+
+                        <p className="mt-1 break-words text-xs text-slate-400">
+                            {error}
+                        </p>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={() => void fetchPayments(true)}
+                        className="shrink-0 rounded-lg border border-rose-400/20 px-3 py-2 text-xs font-bold text-rose-200 transition hover:bg-rose-500/10"
+                    >
+                        Try again
+                    </button>
                 </div>
             )}
+
+            <PaymentsSummary summary={summary} />
+
+            <PaymentsFilters
+                search={search}
+                statusFilter={statusFilter}
+                providerFilter={providerFilter}
+                dateRange={dateRange}
+                providers={providers}
+                hasActiveFilters={hasActiveFilters}
+                onSearchChange={setSearch}
+                onStatusChange={setStatusFilter}
+                onProviderChange={setProviderFilter}
+                onDateRangeChange={setDateRange}
+                onReset={resetFilters}
+            />
+
+            <PaymentsTable
+                payments={payments}
+                filteredPayments={filteredPayments}
+                loading={loading}
+                hasActiveFilters={hasActiveFilters}
+                onSelectPayment={setSelectedPayment}
+                onResetFilters={resetFilters}
+            />
+
+            <PaymentDetailsDrawer
+                payment={selectedPayment}
+                onClose={() => setSelectedPayment(null)}
+            />
         </div>
     );
 }
