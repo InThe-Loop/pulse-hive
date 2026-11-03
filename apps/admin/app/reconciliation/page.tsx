@@ -1,171 +1,389 @@
 'use client';
 
-import React, { useState } from 'react';
+import {
+    useMemo,
+    useState,
+} from 'react';
 
-// Simplified layout records for easy tracking
-interface SimpleBankDeposit {
-    id: string;
-    paidBy: string;
-    amount: number;
-    bankRef: string;
-    date: string;
-}
+import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
 
-interface SimpleCustomerOrder {
-    id: string;
-    customerName: string;
-    amount: number;
-    orderNum: string;
-    items: string;
-}
+import ReconciliationSummary from './components/ReconciliationSummary';
+import ReconciliationLedger from './components/ReconciliationLedger';
 
-export default function PaymentMatcherPage() {
-    // Mock data for payments sitting in the bank with bad/missing references
-    const [unmatchedDeposits, setUnmatchedDeposits] = useState<SimpleBankDeposit[]>([
-        { id: 'b1', paidBy: 'Thabo M.', amount: 450.00, bankRef: 'SKINCARE', date: '14 June' },
-        { id: 'b2', paidBy: 'S Jenkins', amount: 1250.00, bankRef: 'ABCD-EFT', date: '14 June' },
+import { useReconciliation } from './hooks/useReconciliation';
+
+import type {
+    ReconciliationDateRange,
+    ReconciliationStatusFilter,
+} from './lib/reconciliation.types';
+
+import {
+    buildReconciliationRecords,
+    downloadReconciliationCsv,
+} from './lib/reconciliation.utils';
+
+import {
+    formatDate,
+    isWithinDateRange,
+} from '../orders/lib/orders.utils';
+
+export default function ReconciliationPage() {
+    const { isAuthenticated, isChecking } = useAuthGuard();
+
+    const {
+        orders,
+        loading,
+        refreshing,
+        error,
+        lastUpdated,
+        refresh,
+        retry,
+    } = useReconciliation(isAuthenticated && !isChecking);
+
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] =
+        useState<ReconciliationStatusFilter>('ALL');
+    const [dateRange, setDateRange] =
+        useState<ReconciliationDateRange>('ALL');
+
+    const reconciliationRecords = useMemo(
+        () => buildReconciliationRecords(orders),
+        [orders],
+    );
+
+    const dateFilteredRecords = useMemo(
+        () =>
+            reconciliationRecords.filter((record) =>
+                isWithinDateRange(record.order.createdAt, dateRange),
+            ),
+        [reconciliationRecords, dateRange],
+    );
+
+    const filteredRecords = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return dateFilteredRecords.filter((record) => {
+            const searchablePayments = record.order.payments
+                .map((payment) =>
+                    [
+                        payment.provider,
+                        payment.providerReference,
+                        payment.transactionReference,
+                        payment.paymentRequestId,
+                        payment.providerStatusMessage,
+                        payment.status,
+                    ].join(' '),
+                )
+                .join(' ');
+
+            const searchable = [
+                record.order.reference,
+                record.order.id,
+                record.order.customerName,
+                record.order.email,
+                record.order.contactNumber,
+                record.order.itemsSummary,
+                record.order.rawPaymentStatus,
+                record.reason,
+                searchablePayments,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            const matchesSearch =
+                !query || searchable.includes(query);
+
+            const matchesStatus =
+                statusFilter === 'ALL' ||
+                record.status === statusFilter;
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [
+        dateFilteredRecords,
+        search,
+        statusFilter,
     ]);
 
-    // Mock data for orders waiting to be paid
-    const [unpaidOrders, setUnpaidOrders] = useState<SimpleCustomerOrder[]>([
-        { id: 'o1', customerName: 'Thabo Molefe', amount: 450.00, orderNum: 'PH-9042', items: 'Capsules x1' },
-        { id: 'o2', customerName: 'Sarah Jenkins', amount: 1250.00, orderNum: 'PH-3312', items: 'Cream x2, Capsules x1' },
-    ]);
+    const hasActiveFilters =
+        search.trim() !== '' ||
+        statusFilter !== 'ALL' ||
+        dateRange !== 'ALL';
 
-    // Selection states for clicking and matching items
-    const [selectedDeposit, setSelectedDeposit] = useState<SimpleBankDeposit | null>(null);
-    const [selectedOrder, setSelectedOrder] = useState<SimpleCustomerOrder | null>(null);
+    function resetFilters() {
+        setSearch('');
+        setStatusFilter('ALL');
+        setDateRange('ALL');
+    }
 
-    // Click handler to connect the bank deposit to the order
-    const handleLinkRecords = () => {
-        if (!selectedDeposit || !selectedOrder) return;
-
-        alert(`Success! Linked ${selectedDeposit.paidBy}'s payment of R${selectedDeposit.amount} to order ${selectedOrder.orderNum}`);
-        
-        // Remove them from the unmatched screen lists
-        setUnmatchedDeposits(unmatchedDeposits.filter(d => d.id !== selectedDeposit.id));
-        setUnpaidOrders(unpaidOrders.filter(o => o.id !== selectedOrder.id));
-        
-        // Reset selections
-        setSelectedDeposit(null);
-        setSelectedOrder(null);
-    };
+    if (isChecking || !isAuthenticated) {
+        return (
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <p className="font-mono text-xs tracking-widest text-slate-500">
+                    CHECKING SESSION...
+                </p>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-10">
-            
-            {/* Header Block */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/6 pb-6">
+        <div className="space-y-8">
+            <header className="flex flex-col justify-between gap-5 border-b border-white/6 pb-6 xl:flex-row xl:items-end">
                 <div>
-                    <div className="text-[11px] font-bold uppercase text-indigo-400 tracking-widest mb-1.5">
-                        Fix Unmatched Payments
+                    <div className="mb-2 flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-400">
+                            Finance / Reconciliation
+                        </p>
                     </div>
+
                     <h1 className="text-3xl font-black tracking-tight text-white">
-                        Payment Matcher
+                        Payment Reconciliation
                     </h1>
-                    <p className="text-xs text-slate-400 mt-1">
-                        Connect bank deposits with missing references to your customer orders.
+
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                        Compare recorded gateway payments against customer
+                        order totals and identify outstanding balances or
+                        exceptions.
                     </p>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.02] px-3 py-2">
+                        <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                                error
+                                    ? 'bg-rose-400'
+                                    : loading
+                                      ? 'animate-pulse bg-amber-400'
+                                      : 'bg-emerald-400'
+                            }`}
+                        />
+
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">
+                            {error
+                                ? 'Connection issue'
+                                : loading
+                                  ? 'Loading'
+                                  : 'Connected'}
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            downloadReconciliationCsv(filteredRecords)
+                        }
+                        disabled={
+                            loading ||
+                            filteredRecords.length === 0
+                        }
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-bold text-slate-300 transition hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        ↓ Export CSV
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => void refresh()}
+                        disabled={refreshing || loading}
+                        className="rounded-xl bg-indigo-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-500/10 transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {refreshing ? 'Refreshing...' : '↻ Refresh'}
+                    </button>
+                </div>
+            </header>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
+                <span>
+                    {lastUpdated
+                        ? `Last refreshed ${formatDate(lastUpdated.toISOString())}`
+                        : 'Waiting for order records'}
+                </span>
+
+                <span>Automatically refreshes every minute</span>
             </div>
 
-            {/* Quick Match Tool Interaction Strip */}
-            {selectedDeposit && selectedOrder && (
-                <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in zoom-in-95 duration-200">
-                    <p className="text-sm font-medium text-slate-200">
-                        Link <span className="text-white font-bold font-mono">R {selectedDeposit.amount}</span> from <span className="text-white font-bold">{selectedDeposit.paidBy}</span> to <span className="text-white font-bold">{selectedOrder.customerName}'s</span> order (<span className="text-indigo-400 font-mono font-bold">{selectedOrder.orderNum}</span>)?
-                    </p>
-                    <button 
-                        onClick={handleLinkRecords}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
+            {error && (
+                <div
+                    role="alert"
+                    className="flex flex-col justify-between gap-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.05] p-4 sm:flex-row sm:items-center"
+                >
+                    <div>
+                        <p className="text-sm font-semibold text-rose-300">
+                            We couldn't load reconciliation records.
+                        </p>
+
+                        <p className="mt-1 break-words text-xs text-slate-400">
+                            {error}
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => void retry()}
+                        className="shrink-0 rounded-lg border border-rose-400/20 px-3 py-2 text-xs font-bold text-rose-200 transition hover:bg-rose-500/10"
                     >
-                        Confirm Match & Clear
+                        Try again
                     </button>
                 </div>
             )}
 
-            {/* Split Screen Workspace Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                {/* Column 1: Money in the Bank */}
-                <div className="ph-glass-panel p-6 space-y-4">
-                    <h3 className="text-md font-bold text-white flex items-center gap-2">
-                        <span>💰</span> 1. Money In Bank (Unmatched)
-                    </h3>
-                    <p className="text-xs text-slate-400">Payments that landed in your account but haven't been linked to an order yet.</p>
+            <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] px-4 py-3">
+                <div className="flex items-start gap-3">
+                    <span className="mt-0.5 text-amber-300">
+                        <svg
+                            aria-hidden="true"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            className="h-4 w-4"
+                        >
+                            <path
+                                d="M10 6.5v4m0 3h.01M8.27 3.9 1.9 15a1.2 1.2 0 0 0 1.04 1.8h14.12A1.2 1.2 0 0 0 18.1 15L11.73 3.9a2 2 0 0 0-3.46 0Z"
+                                stroke="currentColor"
+                                strokeWidth="1.4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </span>
 
-                    {unmatchedDeposits.length === 0 ? (
-                        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-6 text-center text-xs font-semibold text-emerald-400">
-                            🎉 Awesome! No unmatched bank payments left.
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {unmatchedDeposits.map((deposit) => (
-                                <div 
-                                    key={deposit.id}
-                                    onClick={() => setSelectedDeposit(deposit)}
-                                    className={`p-4 rounded-xl border text-left cursor-pointer transition-all ${
-                                        selectedDeposit?.id === deposit.id 
-                                            ? 'bg-indigo-600/20 border-indigo-500' 
-                                            : 'bg-slate-950/40 border-white/4 hover:bg-white/2'
-                                    }`}
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-sm font-semibold text-white">{deposit.paidBy || 'Unknown Payer'}</p>
-                                            <p className="text-[11px] text-slate-500 font-mono mt-1">Bank Reference: {deposit.bankRef}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-emerald-400 font-mono">R {deposit.amount.toFixed(2)}</p>
-                                            <p className="text-[10px] text-slate-500 mt-1">{deposit.date}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div>
+                        <p className="text-xs font-bold text-amber-200">
+                            Gateway-to-order comparison
+                        </p>
+
+                        <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                            These results use payment transactions recorded
+                            against orders. Bank statement imports and bank
+                            settlement confirmation are not connected yet.
+                        </p>
+                    </div>
                 </div>
-
-                {/* Column 2: Customer Orders waiting for Payment */}
-                <div className="ph-glass-panel p-6 space-y-4">
-                    <h3 className="text-md font-bold text-white flex items-center gap-2">
-                        <span>📦</span> 2. Unpaid Orders
-                    </h3>
-                    <p className="text-xs text-slate-400">Orders created by customers that are still waiting for a matching bank payment.</p>
-
-                    {unpaidOrders.length === 0 ? (
-                        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-6 text-center text-xs font-semibold text-emerald-400">
-                            🎉 Awesome! All active orders have been paid for.
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {unpaidOrders.map((order) => (
-                                <div 
-                                    key={order.id}
-                                    onClick={() => setSelectedOrder(order)}
-                                    className={`p-4 rounded-xl border text-left cursor-pointer transition-all ${
-                                        selectedOrder?.id === order.id 
-                                            ? 'bg-indigo-600/20 border-indigo-500' 
-                                            : 'bg-slate-950/40 border-white/4 hover:bg-white/2'
-                                    }`}
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-sm font-semibold text-white">{order.customerName}</p>
-                                            <p className="text-[11px] text-slate-400 mt-1">{order.items}</p>
-                                            <p className="text-[10px] text-indigo-400 font-mono mt-1 font-bold">{order.orderNum}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-slate-200 font-mono">R {order.amount.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
             </div>
+
+            <ReconciliationSummary records={dateFilteredRecords} />
+
+            <section className="ph-glass-panel space-y-5 p-5">
+                <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                    <div>
+                        <h2 className="text-sm font-bold text-white">
+                            Find a reconciliation record
+                        </h2>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Search orders, customers, payment providers and
+                            transaction references.
+                        </p>
+                    </div>
+
+                    {hasActiveFilters && (
+                        <button
+                            type="button"
+                            onClick={resetFilters}
+                            className="self-start text-xs font-bold text-indigo-300 transition hover:text-indigo-200 sm:self-auto"
+                        >
+                            Clear filters
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.6fr)_repeat(2,minmax(160px,1fr))]">
+                    <div>
+                        <label
+                            htmlFor="reconciliation-search"
+                            className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500"
+                        >
+                            Search
+                        </label>
+
+                        <input
+                            id="reconciliation-search"
+                            type="search"
+                            value={search}
+                            onChange={(event) =>
+                                setSearch(event.target.value)
+                            }
+                            placeholder="Order, customer or transaction reference..."
+                            className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-indigo-400/50"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="reconciliation-status"
+                            className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500"
+                        >
+                            Reconciliation status
+                        </label>
+
+                        <select
+                            id="reconciliation-status"
+                            value={statusFilter}
+                            onChange={(event) =>
+                                setStatusFilter(
+                                    event.target.value as ReconciliationStatusFilter,
+                                )
+                            }
+                            className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-xs text-slate-200 outline-none focus:border-indigo-400/50"
+                        >
+                            <option value="ALL">All statuses</option>
+                            <option value="MATCHED">Matched</option>
+                            <option value="PARTIAL">Partially paid</option>
+                            <option value="PENDING">Awaiting payment</option>
+                            <option value="REVIEW">Needs review</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="reconciliation-date"
+                            className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500"
+                        >
+                            Order date
+                        </label>
+
+                        <select
+                            id="reconciliation-date"
+                            value={dateRange}
+                            onChange={(event) =>
+                                setDateRange(
+                                    event.target.value as ReconciliationDateRange,
+                                )
+                            }
+                            className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-xs text-slate-200 outline-none focus:border-indigo-400/50"
+                        >
+                            <option value="ALL">All loaded records</option>
+                            <option value="TODAY">Today</option>
+                            <option value="7D">Last 7 days</option>
+                            <option value="30D">Last 30 days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/6 pt-4 text-xs text-slate-400">
+                    <span>
+                        <span className="font-mono font-bold text-white">
+                            {filteredRecords.length}
+                        </span>{' '}
+                        of {dateFilteredRecords.length} records
+                    </span>
+
+                    <span className="text-[10px] text-slate-600">
+                        Summary reflects the selected date range.
+                    </span>
+                </div>
+            </section>
+
+            <ReconciliationLedger
+                records={filteredRecords}
+                loading={loading}
+                hasLoadedRecords={orders.length > 0}
+                hasActiveFilters={hasActiveFilters}
+                onResetFilters={resetFilters}
+            />
         </div>
     );
 }
