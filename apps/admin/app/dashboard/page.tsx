@@ -1,35 +1,136 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { apiCall } from '@/lib/api-client';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
+import DashboardHeader from './components/DashboardHeader';
+import DashboardOverview, { PerformanceMetrics } from './components/DashboardOverview';
+import RecentActivity from './components/RecentActivity';
+import SalesAnalytics from './components/SalesAnalytics';
+import type { ChartPeriod, DashboardStats, Order } from './types/dashboard.types';
+import {
+    amount,
+    buildActivity,
+    buildDailyMetrics,
+    orderRevenue,
+    paid,
+    pendingPayment,
+} from './lib/dashboard.utils';
 
-interface DashboardStats {
-    totalOrders: number;
-    totalRevenue: number;
-    pendingPayments: number;
-    readyToShip: number;
-    conversionRate: number;
-    averageOrderValue: number;
-}
+const REFRESH_INTERVAL_MS = 60_000;
 
 export default function DashboardPage() {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const { isAuthenticated, isChecking, userEmail } = useAuthGuard();
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [clock, setClock] = useState(Date.now());
+    const [chartPeriod, setChartPeriod] = useState<ChartPeriod>(7);
 
-    useEffect(() => {
-        setStats({
-            totalOrders: 142,
-            totalRevenue: 128450,
-            pendingPayments: 18,
-            readyToShip: 24,
-            conversionRate: 3.4,
-            averageOrderValue: 904.57,
-        });
-        setLoading(false);
+    const { isAuthenticated, isChecking } = useAuthGuard();
+
+    const fetchOrders = useCallback(async (showLoading = false) => {
+        if (showLoading) {
+            setLoading(true);
+        }
+
+        setError('');
+
+        try {
+            const response = await apiCall<Order[]>('/orders');
+
+            setOrders(Array.isArray(response) ? response : []);
+            setLastUpdated(new Date());
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Unable to load dashboard data.',
+            );
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    // AUTHENTICATION GUARD: Redirect if no token found
+    useEffect(() => {
+        if (isChecking || !isAuthenticated) {
+            return;
+        }
+
+        void fetchOrders(true);
+
+        const refreshTimer = window.setInterval(
+            () => void fetchOrders(),
+            REFRESH_INTERVAL_MS,
+        );
+
+        const clockTimer = window.setInterval(
+            () => setClock(Date.now()),
+            30_000,
+        );
+
+        return () => {
+            window.clearInterval(refreshTimer);
+            window.clearInterval(clockTimer);
+        };
+    }, [fetchOrders, isAuthenticated, isChecking]);
+
+    const stats = useMemo<DashboardStats>(() => {
+        const paidOrders = orders.filter(paid).length;
+
+        const deliveredOrders = orders.filter(
+            (order) =>
+                order.fulfilment?.status === 'DELIVERED'
+                || order.status === 'DELIVERED',
+        ).length;
+
+        return {
+            totalOrders: orders.length,
+            totalRevenue: orders.reduce(
+                (sum, order) => sum + orderRevenue(order),
+                0,
+            ),
+            pendingPayments: orders.filter(pendingPayment).length,
+            readyToShip: orders.filter(
+                (order) =>
+                    paid(order)
+                    && (
+                        !order.fulfilment?.status
+                        || [
+                            'NOT_STARTED',
+                            'PROCESSING',
+                            'PACKED',
+                            'READY_FOR_DISPATCH',
+                        ].includes(order.fulfilment.status)
+                    ),
+            ).length,
+            averageOrderValue: orders.length
+                ? orders.reduce(
+                    (sum, order) => sum + amount(order.totalAmount),
+                    0,
+                ) / orders.length
+                : 0,
+            paidOrderRate: orders.length
+                ? (paidOrders / orders.length) * 100
+                : 0,
+            fulfilmentCompletionRate: paidOrders
+                ? (deliveredOrders / paidOrders) * 100
+                : 0,
+            paidOrders,
+            deliveredOrders,
+        };
+    }, [orders]);
+
+    const chartData = useMemo(
+        () => buildDailyMetrics(orders, chartPeriod, new Date(clock)),
+        [orders, chartPeriod, clock],
+    );
+
+    const activity = useMemo(
+        () => buildActivity(orders),
+        [orders, clock],
+    );
+
     if (isChecking || !isAuthenticated) {
         return (
             <div className="flex min-h-screen items-center justify-center">
@@ -37,160 +138,55 @@ export default function DashboardPage() {
             </div>
         );
     }
-    
-    if (loading || !stats) {
+
+    if (loading && orders.length === 0) {
         return (
-            <div className="flex justify-center items-center h-[60vh] text-slate-500 text-xs font-mono tracking-widest animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping mr-3"></span>
-                OPENING YOUR OVERVIEW...
+            <div className="flex h-[60vh] items-center justify-center font-mono text-xs tracking-widest text-slate-500">
+                <span className="mr-3 h-2 w-2 animate-ping rounded-full bg-indigo-500" />
+                LOADING YOUR OVERVIEW...
             </div>
         );
     }
 
     return (
         <div className="space-y-10">
-            
-            {/* Professional Header Block */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/6 pb-6">
-                <div>
-                    <div className="text-[11px] font-bold uppercase text-indigo-400 tracking-widest mb-1.5">
-                        Operational Status Summary
-                    </div>
-                    <h1 className="text-3xl font-black tracking-tight text-white">
-                        Business Overview
-                    </h1>
-                </div>
-                <div className="flex items-center">
-                    <div className="bg-white/2 border border-white/8 px-4 py-2 rounded-xl text-xs text-slate-300 flex items-center gap-2.5 font-sans font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Live updates active
-                    </div>
-                </div>
-            </div>
+            <DashboardHeader
+                error={error}
+                loading={loading}
+                lastUpdated={lastUpdated}
+                onRefresh={() => void fetchOrders(true)}
+            />
 
-            {/* Main Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                {/* Total Sales */}
-                <div className="ph-glass-panel p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Sales Made</span>
-                        <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-md text-[10px] font-bold">+12.4% this month</span>
+            {error && (
+                <div className="flex flex-col justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 sm:flex-row sm:items-center">
+                    <div>
+                        <p className="text-sm font-semibold text-amber-300">
+                            We couldn't refresh your dashboard data.
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400">{error}</p>
                     </div>
-                    <div className="text-3xl font-black tracking-tight text-white mb-2 font-mono">
-                        R {stats.totalRevenue.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium">Gross revenue recorded</div>
-                </div>
 
-                {/* Total Orders */}
-                <div className="ph-glass-panel p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Orders Booked</span>
-                        <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-md text-[10px] font-bold">All Channels</span>
-                    </div>
-                    <div className="text-3xl font-black tracking-tight text-white mb-2 font-mono">
-                        {stats.totalOrders}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium">Total customer checkout requests</div>
+                    <button
+                        type="button"
+                        onClick={() => void fetchOrders(true)}
+                        className="rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-200 hover:bg-amber-500/10"
+                    >
+                        Try again
+                    </button>
                 </div>
+            )}
 
-                {/* Orders Awaiting Payment */}
-                <div className="ph-glass-panel p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Awaiting Payment</span>
-                        <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-md text-[10px] font-bold">Needs Verification</span>
-                    </div>
-                    <div className="text-3xl font-black tracking-tight text-amber-400 mb-2 font-mono">
-                        {stats.pendingPayments}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium">Orders missing bank deposit links</div>
-                </div>
+            <DashboardOverview stats={stats} />
 
-                {/* Ready to Ship */}
-                <div className="ph-glass-panel p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ready to Pack & Ship</span>
-                        <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-md text-[10px] font-bold">Confirmed Paid</span>
-                    </div>
-                    <div className="text-3xl font-black tracking-tight text-blue-400 mb-2 font-mono">
-                        {stats.readyToShip}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium">Payments completely cleared</div>
-                </div>
-            </div>
+            <SalesAnalytics
+                data={chartData}
+                period={chartPeriod}
+                onPeriodChange={setChartPeriod}
+            />
 
-            {/* Split Progress & Activity Panel */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Professional Performance Metrics Card */}
-                <div className="ph-glass-panel p-6">
-                    <h3 className="text-md font-bold mb-6 text-white flex items-center gap-2">
-                        <span className="text-indigo-400">📊</span> Performance Metrics
-                    </h3>
-                    <div className="flex flex-col gap-6">
-                        <div>
-                            <div className="flex justify-between text-xs font-semibold mb-2 text-slate-400">
-                                <span>Sales Conversion Rate</span>
-                                <span className="text-white font-mono">{stats.conversionRate}%</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/4">
-                                <div 
-                                    className="h-full bg-linear-to-r from-indigo-500 to-purple-500 rounded-full" 
-                                    style={{ width: `${stats.conversionRate * 10}%` }}
-                                ></div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <div className="flex justify-between text-xs font-semibold mb-2 text-slate-400">
-                                <span>Average Order Value</span>
-                                <span className="text-white font-mono">R {stats.averageOrderValue.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/4">
-                                <div className="w-3/4 h-full bg-linear-to-r from-emerald-500 to-teal-500 rounded-full"></div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <div className="flex justify-between text-xs font-semibold mb-2 text-slate-400">
-                                <span>Payment Auto-Matching Success</span>
-                                <span className="text-emerald-400 font-mono font-bold">98.2%</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/4">
-                                <div className="w-[98.2%] h-full bg-linear-to-r from-blue-500 to-indigo-500 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Friendly Activity Timeline Stream */}
-                <div className="ph-glass-panel p-6">
-                    <h3 className="text-md font-bold mb-6 text-white flex items-center gap-2">
-                        <span className="text-emerald-400">✨</span> Real-time Store Activity
-                    </h3>
-                    <div className="flex flex-col gap-1.5 text-xs">
-                        <div className="flex justify-between items-center py-2.5 border-b border-white/4 text-slate-300">
-                            <span className="font-sans truncate max-w-[70%]">📬 New payment notification received via bank integration</span>
-                            <span className="text-slate-500 text-[10px] font-mono">Just now</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-white/4 text-slate-300">
-                            <span className="font-sans truncate max-w-[70%]">🤖 System auto-matched reference label to unpaid order #1094</span>
-                            <span className="text-slate-500 text-[10px] font-mono">5m ago</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-white/4 text-slate-300">
-                            <span className="font-sans truncate max-w-[70%]">🛍️ New order entry created manually (R 1,250.00)</span>
-                            <span className="text-slate-500 text-[10px] font-mono">12m ago</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2.5 pt-3.5 text-slate-400">
-                            <span className="font-sans font-medium text-slate-300">🔌 Bank feed synchronization</span>
-                            <span className="text-emerald-400 font-bold uppercase text-[10px] font-mono tracking-wide bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                                Connected & Active
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <PerformanceMetrics stats={stats} />
+                <RecentActivity activity={activity} />
             </div>
         </div>
     );
