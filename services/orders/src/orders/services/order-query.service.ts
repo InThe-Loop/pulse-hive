@@ -17,6 +17,15 @@ export class OrderQueryService {
                 customer: true,
                 items: true,
                 payments: true,
+                fulfilment: {
+                    include: {
+                        history: {
+                            orderBy: {
+                                createdAt: 'desc',
+                            },
+                        },
+                    },
+                },
             },
             orderBy: {
                 createdAt: 'desc',

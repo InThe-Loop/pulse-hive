@@ -1,10 +1,10 @@
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
     FastifyAdapter,
     NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 
-import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -13,6 +13,14 @@ async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(
         AppModule,
         new FastifyAdapter(),
+    );
+
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+        }),
     );
 
     const port = Number(process.env.PORT ?? 4002);

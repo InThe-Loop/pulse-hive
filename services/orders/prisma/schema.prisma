@@ -26,18 +26,18 @@ model Tenant {
 }
 
 model User {
-  id                    String             @id @default(uuid())
-  email                 String             @unique
-  password              String
-  role                  String             @default("user")
-  emailVerifiedAt       DateTime?
-  displayName           String?
-  bio                   String?
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
-  memberships           UserTenant[]
+  id                      String                   @id @default(uuid())
+  email                   String                   @unique
+  password                String
+  role                    String                   @default("user")
+  emailVerifiedAt         DateTime?
+  displayName             String?
+  bio                     String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  memberships             UserTenant[]
   emailVerificationTokens EmailVerificationToken[]
-  sentTenantInvitations TenantInvitation[] @relation("TenantInvitationInviter")
+  sentTenantInvitations   TenantInvitation[]       @relation("TenantInvitationInviter")
 
   @@index([createdAt])
 }
@@ -132,25 +132,26 @@ model Product {
 }
 
 model Order {
-  id              String        @id @default(cuid())
+  id              String           @id @default(cuid())
   tenantId        String
   reference       String
-  totalAmount     Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal          @db.Decimal(10, 2)
   trackingNumber  String?
-  createdAt       DateTime      @default(now())
+  createdAt       DateTime         @default(now())
   customerId      String?
   deliveryAddress String?
   idempotencyKey  String?
-  paymentStatus   PaymentStatus @default(PENDING)
-  shippingFee     Decimal       @db.Decimal(10, 2)
+  paymentStatus   PaymentStatus    @default(PENDING)
+  shippingFee     Decimal          @db.Decimal(10, 2)
   shippingMethod  String?
-  subtotal        Decimal       @db.Decimal(10, 2)
-  updatedAt       DateTime      @updatedAt
-  status          OrderStatus   @default(PENDING_PAYMENT)
-  customer        Customer?     @relation(fields: [customerId], references: [id])
-  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subtotal        Decimal          @db.Decimal(10, 2)
+  updatedAt       DateTime         @updatedAt
+  status          OrderStatus      @default(PENDING_PAYMENT)
+  customer        Customer?        @relation(fields: [customerId], references: [id])
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   items           OrderItem[]
   payments        Payment[]
+  fulfilment      OrderFulfilment?
 
   @@unique([tenantId, reference])
   @@unique([tenantId, idempotencyKey])
@@ -176,6 +177,42 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model OrderFulfilment {
+  id                 String           @id @default(cuid())
+  orderId            String           @unique
+  status             FulfilmentStatus @default(NOT_STARTED)
+  deliveryProvider   String?
+  trackingReference  String?
+  operationalNotes   String?
+  startedAt          DateTime?
+  packedAt           DateTime?
+  readyForDispatchAt DateTime?
+  dispatchedAt       DateTime?
+  deliveredAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  order   Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  history OrderFulfilmentHistory[]
+
+  @@index([status])
+}
+
+model OrderFulfilmentHistory {
+  id             String            @id @default(cuid())
+  fulfilmentId   String
+  previousStatus FulfilmentStatus?
+  newStatus      FulfilmentStatus
+  actorUserId    String?
+  note           String?
+  createdAt      DateTime          @default(now())
+
+  fulfilment OrderFulfilment @relation(fields: [fulfilmentId], references: [id], onDelete: Cascade)
+
+  @@index([fulfilmentId, createdAt])
+  @@index([actorUserId])
 }
 
 model Payment {
@@ -250,4 +287,15 @@ enum TenantRole {
   ADMIN
   MEMBER
   VIEWER
+}
+
+enum FulfilmentStatus {
+  NOT_STARTED
+  PROCESSING
+  PACKED
+  READY_FOR_DISPATCH
+  DISPATCHED
+  DELIVERED
+  ON_HOLD
+  DELIVERY_FAILED
 }

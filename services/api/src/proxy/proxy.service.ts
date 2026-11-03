@@ -2,6 +2,7 @@ import { Injectable, RawBodyRequest } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import * as jwt from 'jsonwebtoken';
+
 import { IRequestUserContext } from '../common/interfaces/request-context.interface';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class ProxyService {
         this.routeMapping = {
             auth: this.configService.get<string>('AUTH_SERVICE_URL')!,
             orders: this.configService.get<string>('ORDER_SERVICE_URL')!,
+            payments: this.configService.get<string>('ORDER_SERVICE_URL')!,
             tenants: this.configService.get<string>('DB_SERVICE_URL')!,
             users: this.configService.get<string>('DB_SERVICE_URL')!,
             products: this.configService.get<string>('DB_SERVICE_URL')!,
@@ -41,7 +43,7 @@ export class ProxyService {
         try {
             const forwardHeaders: Record<string, string> = {};
 
-            // Client-supplied identity and internal credentials are never trusted.
+            // Never trust client-supplied identity or internal credentials.
             const blockedHeaders = new Set([
                 'content-length',
                 'host',
@@ -151,11 +153,26 @@ export class ProxyService {
                 });
             }
 
-            // Establish trusted tenant context for the Orders listing.
-            if (
+            // Identify endpoints requiring tenant-scoped authorization.
+            const isOrdersListing =
                 targetKey === 'orders' &&
                 req.method === 'GET' &&
-                path === '/orders'
+                path === '/orders';
+
+            const isPaymentsListing =
+                targetKey === 'payments' &&
+                req.method === 'GET' &&
+                path === '/payments';
+
+            const isFulfilmentUpdate =
+                targetKey === 'orders' &&
+                req.method === 'PATCH' &&
+                /^\/orders\/[^/]+\/fulfilment$/.test(path);
+
+            if (
+                isOrdersListing ||
+                isPaymentsListing ||
+                isFulfilmentUpdate
             ) {
                 if (!userContext) {
                     return reply.code(401).send({
@@ -175,7 +192,7 @@ export class ProxyService {
                     return reply.code(400).send({
                         statusCode: 400,
                         error: 'Bad Request',
-                        message: 'Select a tenant before requesting orders',
+                        message: 'Select a tenant before requesting this resource',
                     });
                 }
 
@@ -189,6 +206,12 @@ export class ProxyService {
                         message: 'Tenant authorization is not configured',
                     });
                 }
+
+                const permission = isFulfilmentUpdate
+                    ? 'orders.manage'
+                    : isPaymentsListing
+                      ? 'payments.read'
+                      : 'orders.read';
 
                 let authorizationResponse: Response;
 
@@ -204,7 +227,7 @@ export class ProxyService {
                             },
                             body: JSON.stringify({
                                 tenantId,
-                                permission: 'orders.read',
+                                permission,
                             }),
                         },
                     );
@@ -223,10 +246,16 @@ export class ProxyService {
 
                 if (!authorizationResponse.ok) {
                     if (authorizationResponse.status === 403) {
+                        const resource = isFulfilmentUpdate
+                            ? 'manage orders for'
+                            : isPaymentsListing
+                              ? 'view payments for'
+                              : 'view orders for';
+
                         return reply.code(403).send({
                             statusCode: 403,
                             error: 'Forbidden',
-                            message: 'You do not have permission to view orders for this tenant',
+                            message: `You do not have permission to ${resource} this tenant`,
                         });
                     }
 
@@ -250,11 +279,14 @@ export class ProxyService {
                     });
                 }
 
-                // Only inject the tenant header after authorization succeeds.
+                // Pass tenant context downstream only after permission is verified.
                 forwardHeaders['x-tenant-id'] = tenantId;
             }
 
-            if (['POST', 'PUT', 'PATCH'].includes(req.method) && bodyBuffer) {
+            if (
+                ['POST', 'PUT', 'PATCH'].includes(req.method) &&
+                bodyBuffer
+            ) {
                 forwardHeaders['content-type'] =
                     typeof req.headers['content-type'] === 'string'
                         ? req.headers['content-type']
@@ -293,7 +325,9 @@ export class ProxyService {
             const responseData = await response.text();
 
             try {
-                return reply.code(response.status).send(JSON.parse(responseData));
+                return reply.code(response.status).send(
+                    JSON.parse(responseData),
+                );
             } catch {
                 return reply.code(response.status).send(responseData);
             }
