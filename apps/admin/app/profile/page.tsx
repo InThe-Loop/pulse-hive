@@ -199,7 +199,7 @@ export default function ProfilePage() {
 
     if (!isAuthenticated || isLoading || !user) {
         return (
-            <div className="p-10 text-white" role="status">
+            <div className="flex min-h-screen items-center justify-center">
                 Loading account settings...
             </div>
         );
