@@ -55,16 +55,27 @@ export async function apiCall<T>(
         headers.set('Authorization', `Bearer ${token}`);
     }
 
-    // Only attach tenant context to routes that currently require it.
-    // The gateway must independently authorize every tenant-scoped request.
     const pathname = normalizedEndpoint.split('?')[0];
 
-    if (method === 'GET' && pathname === '/orders') {
+    const isTenantScopedRequest =
+        (
+            method === 'GET' &&
+            (
+                pathname === '/orders' ||
+                pathname === '/payments'
+            )
+        ) ||
+        (
+            method === 'PATCH' &&
+            /^\/orders\/[^/]+\/fulfilment$/.test(pathname)
+        );
+
+    if (isTenantScopedRequest) {
         const tenantId = getSelectedTenantId();
 
         if (!tenantId) {
             throw new Error(
-                'No workspace selected. Please select a workspace and try again.',
+                'Select a tenant before requesting this resource.',
             );
         }
 
