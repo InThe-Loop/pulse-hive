@@ -3,7 +3,14 @@ import { NextResponse } from 'next/server';
 const TENANT_CODE = process.env.PULSEHIVE_TENANT_CODE;
 const DB_SERVICE_URL = process.env.PULSEHIVE_DB_SERVICE_URL;
 
-export async function GET() {
+const CATALOGUE_QUERY_PARAMS = [
+    'section',
+    'search',
+    'limit',
+    'cursor',
+] as const;
+
+export async function GET(request: Request) {
     if (!TENANT_CODE) {
         return NextResponse.json(
             {
@@ -23,19 +30,31 @@ export async function GET() {
     }
 
     try {
-        const response = await fetch(
-            `${DB_SERVICE_URL}/products/tenant/${encodeURIComponent(
-                TENANT_CODE,
-            )}`,
-            {
-                headers: {
-                    Accept: 'application/json',
-                    'x-internal-service-key':
-                        process.env.INTERNAL_SERVICE_KEY ?? '',
-                },
-                cache: 'no-store',
+        const requestUrl = new URL(request.url);
+        const queryParams = new URLSearchParams();
+
+        for (const param of CATALOGUE_QUERY_PARAMS) {
+            const value = requestUrl.searchParams.get(param);
+
+            if (value !== null) {
+                queryParams.set(param, value);
+            }
+        }
+
+        const queryString = queryParams.toString();
+        const productsUrl =
+            `${DB_SERVICE_URL.replace(/\/+$/, '')}` +
+            `/products/tenant/${encodeURIComponent(TENANT_CODE)}` +
+            (queryString ? `?${queryString}` : '');
+
+        const response = await fetch(productsUrl, {
+            headers: {
+                Accept: 'application/json',
+                'x-internal-service-key':
+                    process.env.INTERNAL_SERVICE_KEY ?? '',
             },
-        );
+            cache: 'no-store',
+        });
 
         if (!response.ok) {
             const errorText = await response.text();

@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 
 import { useCart } from '@/context/cart-context';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 import Image from 'next/image';
 
 interface CartItem {
@@ -613,10 +612,6 @@ export default function CheckoutPage() {
      */
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-16 box-border">
-            <header className="sticky top-0 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6 box-border flex items-center justify-center">
-                <GlowaVeeLogo />
-            </header>
-
             <main className="flex flex-col gap-6 px-6 pt-6 max-w-full mx-auto w-full box-border">
 
                 {/* Heading */}

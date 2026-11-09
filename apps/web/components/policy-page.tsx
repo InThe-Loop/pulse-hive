@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { ArrowRight, ShoppingCart, FileText, ShieldCheck, RotateCcw } from 'lucide-react';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 import { useCart } from '@/context/cart-context';
 
 type Section = {
@@ -37,13 +36,6 @@ export function PolicyPage({
 
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-12">
-            {/* Header */}
-            <header className="relative top-0 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
-                </div>
-            </header>
-
             <main className="flex flex-col gap-6 px-6 pt-6 pb-16">
                 {/* Page Title */}
                 <div className="flex flex-col gap-1 items-center text-center">

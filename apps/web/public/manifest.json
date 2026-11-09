@@ -1,16 +1,17 @@
 {
     "name": "Glowa Vee Boutique",
     "short_name": "Glowa Vee",
-    "description": "Premium Collagen Skin Repair Supplements.",
+    "description": "Discover beauty, skincare and cosmetics at Glowa Vee.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#f4f4f3",
-    "theme_color": "#3d2c10",
+    "background_color": "#070707",
+    "theme_color": "#070707",
+    "orientation": "portrait",
     "icons": [
         {
-        "src": "/favicon.png",
-        "sizes": "any",
-        "type": "image/png"
+            "src": "/logo.png",
+            "sizes": "any",
+            "type": "image/png"
         }
     ]
 }

@@ -1,72 +1,112 @@
 @import "tailwindcss";
-@import "tailwindcss/preflight";
-
-@layer base {
-    /* Prevent zoom-in on iOS inputs while maintaining readability */
-    input,
-    select,
-    textarea {
-        font-size: 16px !important;
-        @apply focus:outline-none focus:ring-1 focus:ring-amber-900/20 transition-all duration-300;
-    }
-}
 
 :root {
     color-scheme: dark;
 
-    /* =========================================================
-       BLACK & GOLD LUXURY THEME
-       ========================================================= */
+    /* Glowa Vee — Obsidian & Champagne Gold */
+    --color-background: #070707;
+    --color-background-soft: #0c0b09;
+    --color-logo-background: #070707;
+    --color-surface: #11100e;
+    --color-surface-elevated: #181613;
+    --color-surface-hover: #211c14;
+    --color-border: rgba(216, 181, 109, 0.15);
+    --color-border-strong: rgba(216, 181, 109, 0.32);
+    --color-text: #f6f2e9;
+    --color-text-muted: #c9c1b4;
+    --color-text-soft: #988e7e;
+    --color-gold: #d8b56d;
+    --color-gold-dark: #a77d3d;
+    --color-gold-light: #f2dda9;
+    --color-gold-highlight: #fff0c9;
+    --color-danger: #ef7777;
+    --color-success: #83c9a2;
 
-    /* Lighter charcoal page background */
-    --color-background: #171512;
-    --color-background-soft: #211e18;
+    /* Shared premium gold finish */
+    --gradient-gold-premium: linear-gradient(
+        115deg,
+        #f2dfb0 0%,
+        #d8b56d 36%,
+        #bd914d 72%,
+        #e9cf98 100%
+    );
 
-    /* Logo background */
-    --color-logo-background: #000000;
+    /* Shared storefront alignment */
+    --store-content-max: 1440px;
+    --store-content-gutter: 1.25rem;
 
-    /* Surfaces */
-    --color-surface: rgba(30, 28, 23, 0.94);
-    --color-surface-elevated: rgba(36, 33, 27, 0.97);
-
-    /* Borders */
-    --color-border: rgba(212, 175, 55, 0.14);
-    --color-border-strong: rgba(212, 175, 55, 0.26);
-
-    /* Text */
-    --color-text: #f7f3e9;
-    --color-text-muted: #c4bbaa;
-    --color-text-soft: #999184;
-
-    /* Luxury gold */
-    --color-gold: #d4af37;
-    --color-gold-dark: #8c6b1f;
-    --color-gold-light: #f3d675;
+    /* Typography */
+    --font-display: var(--font-cormorant), Georgia, serif;
+    --font-body: var(--font-dm-sans), Arial, sans-serif;
 }
 
+@media (min-width: 640px) {
+    :root {
+        --store-content-gutter: 1.5rem;
+    }
+}
+
+@theme inline {
+    --font-sans: var(--font-body);
+    --font-serif: var(--font-display);
+}
 
 /* =========================================================
-   HTML / BODY
+   GLOBAL RESET
    ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
 
 html,
 body {
+    min-height: 100%;
     margin: 0;
     padding: 0;
-    min-height: 100%;
-
-    background-color: whitesmoke;
+    background-color: var(--color-background);
     color: var(--color-text);
-
-    font-family: var(--font-barlow), sans-serif;
-
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
 }
 
+html {
+    scroll-behavior: smooth;
+    background: var(--color-background);
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            ellipse 72% 38% at 50% -12%,
+            rgba(216, 181, 109, 0.085),
+            transparent 72%
+        ),
+        radial-gradient(
+            ellipse 42% 32% at 100% 28%,
+            rgba(216, 181, 109, 0.025),
+            transparent 76%
+        ),
+        #070707;
+}
 
 /* =========================================================
-   HEADINGS
+   SHARED STOREFRONT CONTAINER
+   Header, homepage body and footer must use this class.
+   ========================================================= */
+
+.store-container {
+    width: 100%;
+    max-width: var(--store-content-max);
+    margin-inline: auto;
+    padding-inline: var(--store-content-gutter);
+}
+
+/* =========================================================
+   TYPOGRAPHY
    ========================================================= */
 
 h1,
@@ -75,64 +115,291 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: var(--font-saira), serif;
-
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-
     color: var(--color-text);
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    text-wrap: balance;
 }
 
+p {
+    text-wrap: pretty;
+}
+
+.font-display {
+    font-family: var(--font-display);
+}
+
+.font-body {
+    font-family: var(--font-body);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
 
 /* =========================================================
-   LINKS
+   FORM ELEMENTS
    ========================================================= */
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+    min-height: 44px;
+    color: var(--color-text);
+    background-color: #11100e;
+    border-color: var(--color-border-strong);
+    font-size: 16px;
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background-color 180ms ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
+textarea::placeholder {
+    color: var(--color-text-soft);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(216, 181, 109, 0.76);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(216, 181, 109, 0.13);
+}
+
+select option {
+    color: var(--color-text);
+    background: #11100e;
+}
+
+/* =========================================================
+   INTERACTION STATES
+   ========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--color-gold-light);
+    outline-offset: 3px;
+}
 
 a {
     color: inherit;
     text-decoration: none;
-
     transition:
-        color 0.3s ease,
-        opacity 0.3s ease;
+        color 180ms ease,
+        opacity 180ms ease;
 }
 
-a:hover {
-    color: var(--color-gold-light);
+::selection {
+    background: rgba(216, 181, 109, 0.34);
+    color: #ffffff;
 }
-
 
 /* =========================================================
-   PREMIUM CARD
+   CHAMPAGNE GOLD FINISHES
    ========================================================= */
+
+.gold-foil {
+    border-color: var(--color-gold);
+    background-image: var(--gradient-gold-premium);
+}
+
+.gold-foil-text {
+    background-image: linear-gradient(
+        115deg,
+        #f4e4bd 0%,
+        #d8b56d 36%,
+        #b98d49 70%,
+        #f0d9a4 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+/* =========================================================
+   PRIMARY GOLD BUTTON
+   ========================================================= */
+
+.button-gold {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border: 1px solid #e9cc8d;
+    background-image: var(--gradient-gold-premium);
+    padding: 0.7rem 1.15rem;
+    color: #171108;
+    font-family: var(--font-body);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow:
+        0 9px 24px rgba(216, 181, 109, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.52);
+    transition:
+        transform 180ms ease,
+        filter 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.button-gold:hover:not(:disabled) {
+    cursor: pointer;
+    filter: brightness(1.07) saturate(1.04);
+    transform: translateY(-1px);
+    box-shadow:
+        0 12px 28px rgba(216, 181, 109, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.button-gold:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+}
+
+.button-gold:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.45);
+    opacity: 0.55;
+}
+
+/* Temporary visual compatibility for remaining legacy gradient CTAs. */
+button[class*="to-[#f3c54b]"],
+a[class*="to-[#f3c54b]"] {
+    border: 1px solid #e9cc8d;
+    background-image: var(--gradient-gold-premium) !important;
+    color: #171108 !important;
+    box-shadow:
+        0 9px 24px rgba(216, 181, 109, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.48);
+}
+
+button[class*="to-[#f3c54b]"]:hover,
+a[class*="to-[#f3c54b]"]:hover {
+    filter: brightness(1.07) saturate(1.04);
+    box-shadow:
+        0 12px 28px rgba(216, 181, 109, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+/* =========================================================
+   OUTLINE GOLD BUTTON
+   ========================================================= */
+
+.button-gold-outline {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-border-strong);
+    background: rgba(255, 255, 255, 0.015);
+    padding: 0.65rem 1rem;
+    color: var(--color-gold-light);
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+        border-color 180ms ease,
+        background-color 180ms ease,
+        color 180ms ease;
+}
+
+.button-gold-outline:hover {
+    border-color: var(--color-gold);
+    background: rgba(216, 181, 109, 0.075);
+    color: var(--color-gold-highlight);
+}
+
+/* =========================================================
+   PREMIUM SURFACES
+   ========================================================= */
+
+.luxury-panel {
+    border: 1px solid var(--color-border);
+    background: linear-gradient(
+        145deg,
+        #181613 0%,
+        #100f0d 62%,
+        #0b0b0a 100%
+    );
+    box-shadow:
+        0 22px 55px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.gold-rule {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(216, 181, 109, 0.58),
+        transparent
+    );
+}
+
+.gold-kicker {
+    color: var(--color-gold);
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
 
 .card-premium {
-    background: var(--color-surface);
-
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-
     border: 1px solid var(--color-border);
-
+    background: linear-gradient(
+        145deg,
+        #181613 0%,
+        #11100e 100%
+    );
     box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.35),
-        0 1px 0 rgba(212, 175, 55, 0.04) inset;
+        0 18px 48px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.025) inset;
 }
-
-
-/* =========================================================
-   GOLD GLOW
-   ========================================================= */
 
 .gold-glow {
     box-shadow:
-        0 0 20px rgba(212, 175, 55, 0.12),
-        0 8px 30px rgba(0, 0, 0, 0.35);
+        0 0 28px rgba(216, 181, 109, 0.13),
+        0 14px 36px rgba(0, 0, 0, 0.32);
 }
 
+/* =========================================================
+   PRODUCT IMAGE SURFACE
+   ========================================================= */
+
+.product-media {
+    background:
+        radial-gradient(
+            circle at 50% 38%,
+            rgba(216, 181, 109, 0.105) 0%,
+            rgba(38, 32, 22, 0.7) 24%,
+            #15130f 52%,
+            #0a0a09 100%
+        );
+}
 
 /* =========================================================
-   SCROLLBAR
+   SCROLLBARS
    ========================================================= */
 
 .scrollbar-hide {
@@ -144,67 +411,35 @@ a:hover {
     display: none;
 }
 
-
-/* =========================================================
-   STANDARD SCROLLBAR
-   ========================================================= */
-
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 7px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #080808;
+    background: #070707;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #8c6b1f;
+    border: 2px solid #070707;
     border-radius: 999px;
+    background: #80663e;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #d4af37;
+    background: var(--color-gold);
 }
-
 
 /* =========================================================
-   SELECTION
+   ACCESSIBILITY
    ========================================================= */
 
-::selection {
-    background: rgba(212, 175, 55, 0.35);
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   INPUTS
-   ========================================================= */
-
-input,
-select,
-textarea {
-    color: var(--color-text);
-    background-color: #11100d;
-    border-color: var(--color-border-strong);
-}
-
-input::placeholder,
-textarea::placeholder {
-    color: var(--color-text-soft);
-}
-
-
-/* =========================================================
-   FOCUS
-   ========================================================= */
-
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: rgba(212, 175, 55, 0.5);
-
-    box-shadow:
-        0 0 0 2px rgba(212, 175, 55, 0.08),
-        0 0 20px rgba(212, 175, 55, 0.05);
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

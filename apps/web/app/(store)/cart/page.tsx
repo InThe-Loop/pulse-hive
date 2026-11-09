@@ -15,7 +15,6 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 
 const COURIER_OPTIONS = [
     {
@@ -69,29 +68,8 @@ export default function CartPage() {
 
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-16">
-
-            {/* =====================================================
-                HEADER
-                ===================================================== */}
-
-            <header className="top-5 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
-                </div>
-            </header>
-
-            {/* =====================================================
-                MAIN
-                ===================================================== */}
-
             <main className="flex flex-col gap-7 px-5 sm:px-6 pt-7">
-
-                {/* =================================================
-                    PAGE TITLE
-                    ================================================= */}
-
                 <div className="flex flex-col items-center text-center">
-
                     <div className="flex items-center gap-2 mb-2">
                         <Sparkles
                             size={12}
@@ -118,14 +96,8 @@ export default function CartPage() {
                     </div>
                 </div>
 
-                {/* =================================================
-                    EMPTY CART
-                    ================================================= */}
-
                 {cart.length === 0 ? (
-
                     <div className="w-full border border-(--color-border-strong) bg-(--color-surface) p-10 text-center shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center">
-
                         <div className="w-16 h-16 bg-black flex items-center justify-center text-(--color-gold-light) mb-5 border border-(--color-gold)/30 rounded-full shadow-lg">
                             <ShoppingCart size={26} />
                         </div>
@@ -139,28 +111,19 @@ export default function CartPage() {
                             of beauty and wellness essentials.
                         </p>
 
-                        {/* Explicit spacing */}
                         <div className="h-10" />
 
                         <Link
                             href="/"
-                            className="w-full h-12 inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#3d2c10] to-[#f3c54b] text-xs font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:brightness-105"
+                            className="button-gold w-full min-h-12"
                         >
                             Explore Collection
                             <ArrowRight size={14} />
                         </Link>
                     </div>
-
                 ) : (
-
                     <>
-
-                        {/* =================================================
-                            BAG ITEMS
-                            ================================================= */}
-
                         <section className="w-full">
-
                             <div className="flex items-center justify-between mb-3">
                                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-text-muted)">
                                     Your Items
@@ -172,18 +135,12 @@ export default function CartPage() {
                             </div>
 
                             <div className="flex w-full flex-col gap-3">
-
                                 {cart.map((item: any) => (
-
                                     <div
                                         key={item.id}
                                         className="group flex w-full items-center justify-between border border-(--color-border-strong) bg-(--color-surface) p-4 sm:p-5 shadow-[0_6px_25px_rgba(0,0,0,0.05)] transition-all duration-300 hover:border-(--color-gold)/40 hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)]"
                                     >
-
-                                        {/* Product Information */}
-
                                         <div className="flex flex-col gap-1 pr-4 min-w-0">
-
                                             <h2 className="text-xs sm:text-sm font-bold text-(--color-text) line-clamp-2">
                                                 {item.name}
                                             </h2>
@@ -191,15 +148,10 @@ export default function CartPage() {
                                             <p className="text-[10px] uppercase tracking-wider text-(--color-gold-dark) font-semibold">
                                                 R{Number(item.price).toFixed(2)} each
                                             </p>
-
                                         </div>
 
-                                        {/* Quantity + Remove */}
-
                                         <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-
                                             <div className="flex items-center gap-2 border border-(--color-border-strong) bg-(--color-background) px-2.5 py-1.5">
-
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -231,7 +183,6 @@ export default function CartPage() {
                                                 >
                                                     <Plus size={12} />
                                                 </button>
-
                                             </div>
 
                                             <button
@@ -244,28 +195,15 @@ export default function CartPage() {
                                             >
                                                 <Trash2 size={16} />
                                             </button>
-
                                         </div>
-
                                     </div>
-
                                 ))}
-
                             </div>
-
                         </section>
 
-
-                        {/* =================================================
-                            DELIVERY
-                            ================================================= */}
-
                         <section className="w-full border border-(--color-border-strong) bg-(--color-surface) p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-
                             <div className="flex flex-col gap-4 mb-5">
-
                                 <div className="flex items-center justify-between gap-4">
-
                                     <div>
                                         <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-gold-dark) flex items-center gap-2 mb-1.5">
                                             <Truck size={15} />
@@ -285,28 +223,20 @@ export default function CartPage() {
                                             className="object-contain p-1"
                                         />
                                     </div>
-
                                 </div>
 
                                 <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider text-(--color-text-soft)">
                                     <span className="w-1.5 h-1.5 rounded-full bg-(--color-gold)" />
                                     The Courier Guy
                                 </div>
-
                             </div>
 
-
-                            {/* Delivery Options */}
-
                             <div className="space-y-3">
-
                                 {COURIER_OPTIONS.map((option) => {
-
                                     const isSelected =
                                         selectedShipping?.id === option.id;
 
                                     return (
-
                                         <button
                                             key={option.id}
                                             type="button"
@@ -315,18 +245,16 @@ export default function CartPage() {
                                             }
                                             className={`w-full flex items-center justify-between gap-4 p-4 border transition-all duration-300 text-left ${
                                                 isSelected
-                                                    ? 'border-(--color-gold) bg-[#2a1f0a] shadow-[0_8px_25px_rgba(42,31,10,0.18)]'
+                                                    ? 'border-(--color-gold) bg-[#1a160f] shadow-[0_8px_25px_rgba(216,181,109,0.12)]'
                                                     : 'border-(--color-border-strong) bg-(--color-background) hover:border-(--color-gold)/50'
                                             }`}
                                         >
-
                                             <div className="flex items-center gap-3 min-w-0">
-
                                                 <div
                                                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
                                                         isSelected
-                                                            ? 'border-[#f3c54b] bg-[#f3c54b]'
-                                                            : 'border-[#d4af37] bg-[#f8f4ea]'
+                                                            ? 'border-(--color-gold-light) bg-(--color-gold)'
+                                                            : 'border-(--color-border-strong) bg-(--color-surface)'
                                                     }`}
                                                 >
                                                     {isSelected && (
@@ -335,7 +263,6 @@ export default function CartPage() {
                                                 </div>
 
                                                 <div className="min-w-0">
-
                                                     <span
                                                         className={`text-xs sm:text-sm font-bold block ${
                                                             isSelected
@@ -365,9 +292,7 @@ export default function CartPage() {
                                                     >
                                                         {option.time}
                                                     </span>
-
                                                 </div>
-
                                             </div>
 
                                             <span
@@ -379,22 +304,12 @@ export default function CartPage() {
                                             >
                                                 R{option.price}
                                             </span>
-
                                         </button>
-
                                     );
-
                                 })}
-
                             </div>
 
-
-                            {/* =================================================
-                                ORDER SUMMARY
-                                ================================================= */}
-
                             <div className="space-y-3 pt-6 mt-6 border-t border-(--color-border)">
-
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="text-(--color-text-muted)">
                                         Subtotal
@@ -418,7 +333,6 @@ export default function CartPage() {
                                 </div>
 
                                 <div className="flex items-center justify-between pt-4 mt-2 border-t border-dashed border-(--color-border)">
-
                                     <span className="text-xs font-bold uppercase tracking-wider text-(--color-text)">
                                         Total to Pay
                                     </span>
@@ -426,38 +340,24 @@ export default function CartPage() {
                                     <span className="text-xl font-bold text-(--color-gold-dark)">
                                         R{totalToPay.toFixed(2)}
                                     </span>
-
                                 </div>
-
                             </div>
 
-                            {/* Explicit spacing */}
                             <div className="h-10" />
 
-                            {/* =================================================
-                                CHECKOUT BUTTON
-                                ================================================= */}
-
                             {!selectedShipping ? (
-
                                 <div className="w-full h-12 mt-7 flex items-center justify-center gap-2 bg-[#2a2419] border border-[#4a402d] text-[10px] font-bold uppercase tracking-wider text-[#8f846f]">
                                     Select delivery method to continue
                                 </div>
-
                             ) : (
-
                                 <Link
                                     href="/checkout"
-                                    className="w-full h-12 mt-7 inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#3d2c10] to-[#f3c54b] text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#3d2c10]/15 transition-all hover:brightness-105 active:scale-[0.99]"
+                                    className="button-gold mt-7 w-full min-h-12 active:scale-[0.99]"
                                 >
                                     Continue to Checkout
                                     <ArrowRight size={16} />
                                 </Link>
-
                             )}
-
-
-                            {/* Security */}
 
                             <div className="flex items-center justify-center gap-1.5 mt-5 text-[9px] uppercase tracking-wider text-(--color-text-muted)">
                                 <ShieldCheck
@@ -469,13 +369,9 @@ export default function CartPage() {
                                     Encrypted & secure checkout processing
                                 </span>
                             </div>
-
                         </section>
-
                     </>
-
                 )}
-
             </main>
         </div>
     );

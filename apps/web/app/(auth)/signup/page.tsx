@@ -3,30 +3,42 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowRight, ShoppingCart, UserPlus, ShieldCheck, Loader2, CheckCircle2 } from 'lucide-react';
-import { useCart } from '@/context/cart-context';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
+import {
+    ArrowRight,
+    ShieldCheck,
+    Loader2,
+    CheckCircle2,
+} from 'lucide-react';
 import { apiClient } from '@/app/api/api-client';
+import { AuthPageLayout } from '@/components/auth-page-layout';
+import { GoogleSignInButton } from '@/components/google-signin-button';
 
 export default function RegisterPage() {
-    const { cart } = useCart();
     const router = useRouter();
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(
+        null,
+    );
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (
+        event: React.FormEvent<HTMLFormElement>,
+    ) => {
+        event.preventDefault();
+
         setError(null);
         setSuccessMessage(null);
         setLoading(true);
 
         try {
-            // Communicates with the auth service gateway using the correct schema fields
-            const response = await apiClient.post<{ token?: string; user?: any }>('/auth/signup', {
+            const response = await apiClient.post<{
+                token?: string;
+                user?: unknown;
+            }>('/auth/signup', {
                 email,
                 password,
                 displayName: name,
@@ -36,129 +48,181 @@ export default function RegisterPage() {
                 localStorage.setItem('auth_token', response.token);
             }
 
-            setSuccessMessage('Account created successfully! Redirecting...');
+            setSuccessMessage(
+                'Account created successfully! Redirecting...',
+            );
 
-            // Slight delay so the user can read the success message before routing
             setTimeout(() => {
                 router.push('/signin');
             }, 1200);
-        } catch (err: any) {
-            setError(err.message || 'Registration failed. Please check your details and try again.');
+        } catch (err: unknown) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Registration failed. Please check your details and try again.',
+            );
+
             setLoading(false);
         }
     };
 
     return (
-        <div className="w-full min-h-screen bg-(--color-background) pb-12 box-border">
-            {/* Header */}
-            <header className="top-5 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
+        <AuthPageLayout
+            eyebrow="Join Glowa Vee"
+            title="A More Personal Beauty Experience"
+            description="Create your client account to enjoy a more personal shopping experience, keep track of your orders and stay connected with our beauty concierge."
+            tagline="Discover your glow."
+            formTitle="Create Account"
+            formDescription="A few details to get your Glowa Vee experience started."
+            formScrollable={true}
+        >
+            {error && (
+                <div
+                    role="alert"
+                    className="mb-5 border border-red-500/25 bg-red-500/10 p-3 text-xs leading-relaxed text-red-300"
+                >
+                    {error}
                 </div>
-            </header>
+            )}
 
-            <main className="flex flex-col gap-6 px-6 pt-6 max-w-full mx-auto w-full box-border">
-                {/* Page Title & Breadcrumb indicator */}
-                <div className="flex flex-col gap-1 items-center text-center">
-                    <div className="w-12 h-12 bg-(--color-surface) flex items-center justify-center text-(--color-gold-dark) mb-2 rounded-full border border-(--color-border)">
-                        <UserPlus size={20} />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-dark)">
-                        Member Account
-                    </span>
-                    <h1 className="text-2xl font-serif text-(--color-text)">Create Account</h1>
-                    <p className="text-xs text-(--color-text-muted)">Save your details for faster checkout and tracking.</p>
+            {successMessage && (
+                <div
+                    role="status"
+                    className="mb-5 flex items-center gap-2 border border-emerald-500/25 bg-emerald-500/10 p-3 text-xs leading-relaxed text-emerald-300"
+                >
+                    <CheckCircle2
+                        size={16}
+                        className="shrink-0"
+                    />
+
+                    <span>{successMessage}</span>
+                </div>
+            )}
+
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-5"
+            >
+                <div className="space-y-2">
+                    <label
+                        htmlFor="signup-name"
+                        className="block text-[9px] font-bold uppercase tracking-[0.18em] text-(--color-text-muted)"
+                    >
+                        Full Name
+                    </label>
+
+                    <input
+                        id="signup-name"
+                        type="text"
+                        value={name}
+                        onChange={(event) =>
+                            setName(event.target.value)
+                        }
+                        autoComplete="name"
+                        className="w-full border border-(--color-border-strong) bg-(--color-surface)/40 px-4 py-3.5 text-xs text-(--color-text) outline-none transition placeholder:text-(--color-text-soft) focus:border-(--color-gold)/60 focus:ring-2 focus:ring-(--color-gold)/10 sm:text-sm"
+                        placeholder="Enter your full name"
+                        required
+                    />
                 </div>
 
-                {/* Form Card */}
-                <div className="w-full border border-(--color-border-strong) p-6 shadow-xs box-border">
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded">
-                            {error}
-                        </div>
+                <div className="space-y-2">
+                    <label
+                        htmlFor="signup-email"
+                        className="block text-[9px] font-bold uppercase tracking-[0.18em] text-(--color-text-muted)"
+                    >
+                        Email Address
+                    </label>
+
+                    <input
+                        id="signup-email"
+                        type="email"
+                        value={email}
+                        onChange={(event) =>
+                            setEmail(event.target.value)
+                        }
+                        autoComplete="email"
+                        className="w-full border border-(--color-border-strong) bg-(--color-surface)/40 px-4 py-3.5 text-xs text-(--color-text) outline-none transition placeholder:text-(--color-text-soft) focus:border-(--color-gold)/60 focus:ring-2 focus:ring-(--color-gold)/10 sm:text-sm"
+                        placeholder="name@example.com"
+                        required
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        htmlFor="signup-password"
+                        className="block text-[9px] font-bold uppercase tracking-[0.18em] text-(--color-text-muted)"
+                    >
+                        Password
+                    </label>
+
+                    <input
+                        id="signup-password"
+                        type="password"
+                        value={password}
+                        onChange={(event) =>
+                            setPassword(event.target.value)
+                        }
+                        autoComplete="new-password"
+                        className="w-full border border-(--color-border-strong) bg-(--color-surface)/40 px-4 py-3.5 text-xs text-(--color-text) outline-none transition placeholder:text-(--color-text-soft) focus:border-(--color-gold)/60 focus:ring-2 focus:ring-(--color-gold)/10 sm:text-sm"
+                        placeholder="Create a secure password"
+                        required
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="button-gold mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 px-4 text-[10px] font-bold uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {loading ? (
+                        <>
+                            <Loader2
+                                size={16}
+                                className="animate-spin"
+                            />
+                            Creating account...
+                        </>
+                    ) : (
+                        <>
+                            Create account
+                            <ArrowRight size={16} />
+                        </>
                     )}
+                </button>
+            </form>
 
-                    {successMessage && (
-                        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                            <span>{successMessage}</span>
-                        </div>
-                    )}
+            <div className="my-6 flex items-center gap-4">
+                <div className="h-px flex-1 bg-(--color-border)" />
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">Full Name *</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10]"
-                                placeholder="Enter your full name"
-                                required
-                            />
-                        </div>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-(--color-text-soft)">
+                    Or
+                </span>
 
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">Email Address *</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10]"
-                                placeholder="name@example.com"
-                                required
-                            />
-                        </div>
+                <div className="h-px flex-1 bg-(--color-border)" />
+            </div>
 
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">Password *</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10]"
-                                placeholder="Create a secure password"
-                                required
-                            />
-                        </div>
+            <GoogleSignInButton />
 
-                        {/* Explicit spacing */}
-                        <div className="h-10" />
+            <div className="mt-7 border-t border-(--color-border) pt-6 text-center">
+                <p className="text-xs text-(--color-text-muted)">
+                    Already have an account?{' '}
+                    <Link
+                        href="/signin"
+                        className="font-semibold text-(--color-gold-light) transition-colors hover:text-(--color-gold)"
+                    >
+                        Sign in
+                    </Link>
+                </p>
+            </div>
 
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="w-full h-12 mt-2 inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#3d2c10] to-[#f3c54b] text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#3d2c10]/10 transition hover:brightness-105 disabled:opacity-50"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 size={16} className="animate-spin" /> Creating account...
-                                </>
-                            ) : (
-                                <>
-                                    Create account <ArrowRight size={16} />
-                                </>
-                            )}
-                        </button>
-                    </form>
+            <div className="mt-6 flex items-center justify-center gap-2 border-t border-(--color-border) pt-5 text-[10px] text-(--color-text-muted)">
+                <ShieldCheck
+                    size={14}
+                    className="text-(--color-gold)"
+                />
 
-                    {/* Switch to Login */}
-                    <div className="mt-6 pt-6 border-t border-(--color-border) text-center">
-                        <p className="text-xs text-(--color-text-muted)">
-                            Already have an account?{' '}
-                            <Link href="/signin" className="font-bold text-(--color-gold-dark) hover:underline">
-                                Sign in
-                            </Link>
-                        </p>
-                    </div>
-
-                    {/* Trust Badge */}
-                    <div className="flex items-center justify-center gap-1.5 mt-6 pt-6 border-t border-(--color-border) text-[10px] text-(--color-text-muted)">
-                        <ShieldCheck size={14} className="text-(--color-gold-dark)" />
-                        <span>Secure client information storage</span>
-                    </div>
-                </div>
-            </main>
-        </div>
+                <span>Secure client information storage</span>
+            </div>
+        </AuthPageLayout>
     );
 }

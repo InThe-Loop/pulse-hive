@@ -10,21 +10,10 @@ import {
     Gem,
     Star,
 } from 'lucide-react';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 
 export default function AboutPage() {
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-12 box-border">
-
-            {/* =====================================================
-                HEADER
-                ===================================================== */}
-            <header className="top-5 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
-                </div>
-            </header>
-
             {/* =====================================================
                 MAIN CONTENT
                 ===================================================== */}

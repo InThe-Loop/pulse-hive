@@ -11,7 +11,6 @@ import {
     Loader2,
     ShoppingCart,
 } from 'lucide-react';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 import { useCart } from '@/context/cart-context';
 
 export default function ContactPage() {
@@ -37,13 +36,6 @@ export default function ContactPage() {
 
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-12 box-border">
-
-            <header className="top-5 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
-                </div>
-            </header>
-
             <main className="flex flex-col gap-6 px-6 pt-6 max-w-full mx-auto w-full box-border">
 
                 {/* =====================================================

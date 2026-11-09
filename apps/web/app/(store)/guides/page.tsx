@@ -1,7 +1,6 @@
 'use client';
 
 import { BookOpen, ArrowRight } from 'lucide-react';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 
 const GUIDES = [
     {
@@ -114,14 +113,6 @@ const GUIDES = [
 export default function GuidesPage() {
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-12">
-
-            {/* Header */}
-            <header className="top-5 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6">
-                <div className="flex justify-center items-center">
-                    <GlowaVeeLogo />
-                </div>
-            </header>
-
             <main className="flex flex-col gap-6 px-6 pt-6">
 
                 {/* Page Title */}

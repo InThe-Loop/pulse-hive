@@ -1,22 +1,38 @@
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
-import { NavBar } from '@/components/nav-bar';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { StorefrontShell } from '@/components/storefront-shell';
 import { CartProvider } from '@/context/cart-context';
-import { Barlow_Condensed, Saira_Condensed } from 'next/font/google';
-import { Footer } from '@/components/footer';
-import { FloatingCart } from '@/components/floating-cart';
 
-const barlow = Barlow_Condensed({
-    weight: '900',
+const cormorant = Cormorant_Garamond({
+    weight: ['400', '500', '600', '700'],
     subsets: ['latin'],
-    variable: '--font-barlow',
+    variable: '--font-cormorant',
+    display: 'swap',
 });
 
-const saira = Saira_Condensed({
-    weight: '900',
+const dmSans = DM_Sans({
     subsets: ['latin'],
-    variable: '--font-saira',
+    variable: '--font-dm-sans',
+    display: 'swap',
 });
+
+export const metadata: Metadata = {
+    title: 'Glowa Vee - Collagen Skin Repair Products',
+    description:
+        'Discover beauty, skincare and cosmetics curated to complement your individuality.',
+    applicationName: 'Glowa Vee',
+    manifest: '/manifest.json',
+    icons: {
+        icon: '/logo.png',
+        apple: '/logo.png',
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: '#070707',
+};
 
 export default function RootLayout({
     children,
@@ -26,80 +42,13 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`${barlow.variable} ${saira.variable}`}
+            className={`${cormorant.variable} ${dmSans.variable}`}
         >
-            <head>
-                <link
-                    rel="manifest"
-                    href="/manifest.json"
-                />
-
-                <meta
-                    name="theme-color"
-                    content="#2a1f0a"
-                />
-
-                <link
-                    rel="apple-touch-icon"
-                    href="/icon-192.png"
-                />
-
-                <link
-                    rel="icon"
-                    href="/favicon.png"
-                    type="image/png"
-                />
-
-                <title>
-                    Glowa Vee Boutique - Find the right glow!
-                </title>
-            </head>
-
-            <body className="min-h-screen bg-(--color-background) text-(--color-text)">
+            <body className="min-h-screen bg-(--color-background) text-(--color-text) antialiased">
                 <CartProvider>
-
-                    {/* Main application area */}
-                    <div className="relative flex justify-center w-full min-h-screen py-0 sm:py-4">
-
-                        {/* App Container */}
-                        <div
-                            className="
-                                relative
-                                flex
-                                flex-col
-                                w-full
-                                max-w-lg
-                                sm:max-w-11/12
-                                min-h-screen
-                                sm:min-h-[calc(100vh-2rem)]
-                                min-w-0
-                                box-border
-                                overflow-x-hidden
-                                bg-(--color-surface-elevated)
-                                backdrop-blur-xl
-                                border-x
-                                sm:border
-                                border-(--color-border)
-                                shadow-[0_24px_70px_rgba(42,35,24,0.06)]
-                                py-4
-                                sm:py-6
-                            "
-                        >
-                            <main className="flex-1 w-full min-w-0 max-w-full box-border pb-6 sm:pb-8 overflow-x-hidden">
-                                {children}
-                            </main>
-
-                            <div className="pt-8 pb-24">
-                                <Footer />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Fixed elements MUST live outside the App Container */}
-                    <NavBar />
-
-                    <FloatingCart />
-
+                    <StorefrontShell>
+                        {children}
+                    </StorefrontShell>
                 </CartProvider>
             </body>
         </html>

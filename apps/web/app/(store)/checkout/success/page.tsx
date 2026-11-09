@@ -2,16 +2,10 @@
 
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
-import { GlowaVeeLogo } from '@/components/glowa-vee-logo';
 
 export default function CheckoutSuccessPage() {
     return (
         <div className="w-full min-h-screen bg-(--color-background) pb-16">
-
-            <header className="sticky top-0 z-40 bg-(--color-surface)/95 backdrop-blur-md border-b border-(--color-border) p-6 flex items-center justify-center">
-                <GlowaVeeLogo />
-            </header>
-
             <main className="px-6 pt-12 flex justify-center">
                 <div className="w-full border border-(--color-border-strong) p-10 text-center shadow-xs">
 

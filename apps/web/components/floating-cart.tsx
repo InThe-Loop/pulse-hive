@@ -1,74 +1,42 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 
 export function FloatingCart() {
     const { cart } = useCart();
+    const itemCount = cart.reduce(
+        (total: number, item: { quantity?: number }) =>
+            total + (Number(item.quantity) || 1),
+        0,
+    );
 
     return (
         <Link
             href="/cart"
-            aria-label={`${cart.length} items in cart`}
-            className="
-                fixed
-                top-4
-                right-4
-                sm:top-4
-                sm:right-20
-                z-99999
-                flex
-                items-center
-                justify-center
-                w-10
-                h-10
-                sm:w-10
-                sm:h-10
-                rounded-full
-                bg-white/95
-                backdrop-blur-md
-                border
-                border-(--color-border-strong)
-                shadow-lg
-                transition-all
-                duration-200
-                hover:scale-105
-                hover:shadow-xl
-                active:scale-95
-            "
+            aria-label={`Shopping bag, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
+            className="group inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-(--color-border-strong) bg-white/[0.025] px-3.5 text-(--color-text) transition duration-200 hover:border-(--color-gold) hover:bg-[rgba(216,181,109,0.055)] hover:shadow-[0_0_26px_rgba(216,181,109,0.1)] sm:h-11 sm:px-4"
         >
-            <div className="relative flex items-center justify-center">
-                <ShoppingCart
-                    size={26}
-                    className="sm:w-7 sm:h-7 text-(--color-gold-dark)"
-                    strokeWidth={2}
+            <span className="relative inline-flex">
+                <ShoppingBag
+                    size={18}
+                    strokeWidth={1.6}
+                    className="transition-colors group-hover:text-(--color-gold-light)"
                 />
-
                 <span
-                    className="
-                        absolute
-                        -top-2
-                        -right-2
-                        min-w-6
-                        h-6
-                        px-1
-                        flex
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-(--color-gold-dark)
-                        text-white
-                        text-xs
-                        font-bold
-                        leading-none
-                        border-2
-                        border-(--color-surface)
-                    "
+                    className={`absolute -right-2 -top-2 flex h-[17px] min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold leading-none ${
+                        itemCount > 0
+                            ? 'gold-foil text-[#120d05] shadow-[0_2px_8px_rgba(216,181,109,0.2)]'
+                            : 'border border-(--color-border-strong) bg-[#14120e] text-(--color-gold-light)'
+                    }`}
                 >
-                    {cart.length}
+                    {itemCount}
                 </span>
-            </div>
+            </span>
+            <span className="hidden text-[9px] font-bold uppercase tracking-[0.19em] sm:inline">
+                Bag
+            </span>
         </Link>
     );
 }
