@@ -2,6 +2,7 @@ import {
     Controller,
     Get,
     Param,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 
@@ -18,9 +19,19 @@ export class ProductsController {
     @Get('tenant/:tenantCode')
     async getProductsByTenantCode(
         @Param('tenantCode') tenantCode: string,
+        @Query('section') section?: string,
+        @Query('limit') limit?: string,
+        @Query('cursor') cursor?: string,
+        @Query('search') search?: string,
     ) {
         return this.productsService.getProductsByTenantCode(
             tenantCode,
+            {
+                section,
+                limit,
+                cursor,
+                search,
+            },
         );
     }
 }

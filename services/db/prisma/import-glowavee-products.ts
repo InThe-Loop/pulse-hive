@@ -146,7 +146,7 @@ const products =
         image: '/products/famous.jpg',
         name: 'Famous Box',
         price: 1000,
-        size: '7-Piece COllection',
+        size: '7-Piece Collection',
         description:
         'A premium Glowa Vee beauty and wellness product created to support your self-care routine. Inside the box: 1x 50g Night Cream, 1x 50g Day Cream, 1x 30ml Serum, 1x 100g Soap Bar, 1x 30 Capsules, 1x 100ml Hydrating Body Lotion and 1x 100ml Body Hydrating Gel',
     },
@@ -212,7 +212,16 @@ async function main() {
                 image: product.image,
                 size: product.size,
                 price: product.price,
-                active: true,
+                catalogueType: [
+                    'All Glam',
+                    'Body Health',
+                    'Skin Tag Removal Combo',
+                    'Collagen Creams & Serum',
+                    'Famous Box',
+                ].includes(product.name)
+                    ? 'COMBO'
+                    : 'PRODUCT',
+                status: 'ACTIVE',
             },
         }),
         ),

@@ -94,40 +94,81 @@ model EmailVerificationToken {
   @@index([userId, expiresAt])
 }
 
-model Customer {
-  id        String   @id @default(cuid())
-  tenantId  String
-  name      String
-  phone     String?
-  email     String?
-  address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders    Order[]
+// Global customer identity.
+// One identity can be associated with customer profiles across multiple tenants.
+model CustomerIdentity {
+  id              String    @id @default(cuid())
+  phone           String    @unique
+  phoneVerifiedAt DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
+  customers Customer[]
+
+  @@index([phoneVerifiedAt])
+  @@index([isActive])
+}
+
+// OTP challenges are global and independent of tenant accounts.
+// Only the hashed OTP is stored.
+model CustomerOtpChallenge {
+  id          String    @id @default(cuid())
+  phone       String
+  codeHash    String
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+  @@index([phone, consumedAt, expiresAt])
+}
+
+model Customer {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  customerIdentityId String?
+  name               String
+  phone              String?
+  email              String?
+  address            String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerIdentity CustomerIdentity? @relation(fields: [customerIdentityId], references: [id], onDelete: SetNull)
+  orders           Order[]
+
+  @@unique([tenantId, customerIdentityId])
   @@index([tenantId])
   @@index([tenantId, phone])
   @@index([tenantId, email])
+  @@index([customerIdentityId])
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  tenantId    String
-  name        String
-  description String?
-  sku         String?
-  image       String?
-  size        String?
-  price       Decimal     @db.Decimal(10, 2)
-  active      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
-  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id            String        @id @default(cuid())
+  tenantId      String
+  name          String
+  description   String?
+  sku           String?
+  image         String?
+  size          String?
+  price         Decimal       @db.Decimal(10, 2)
+  catalogueType CatalogueType @default(PRODUCT)
+  status        ProductStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  orderItems    OrderItem[]
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([tenantId, active])
+  @@index([tenantId, status])
+  @@index([tenantId, catalogueType, status])
+  @@index([tenantId, catalogueType, status, createdAt, id])
   @@index([tenantId, sku])
 }
 
@@ -248,6 +289,17 @@ model Payment {
   @@index([tenantId, createdAt])
   @@index([tenantId, orderId])
   @@index([providerReference])
+}
+
+enum CatalogueType {
+  PRODUCT
+  COMBO_SPECIAL
+  RESELLER_PACK
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum OrderStatus {

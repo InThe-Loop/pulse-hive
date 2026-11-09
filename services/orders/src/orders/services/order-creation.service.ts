@@ -235,7 +235,7 @@ export class OrderCreationService {
                     in: productIds,
                 },
                 tenantId: tenant.id,
-                active: true,
+                status: 'ACTIVE',
             },
             select: {
                 id: true,
@@ -353,7 +353,7 @@ export class OrderCreationService {
                                 in: productIds,
                             },
                             tenantId: tenant.id,
-                            active: true,
+                            status: 'ACTIVE',
                         },
                         select: {
                             id: true,
