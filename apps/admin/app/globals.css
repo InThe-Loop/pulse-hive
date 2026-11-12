@@ -70,46 +70,94 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Pointer cursor for interactive elements. */
-button,
-[role="button"],
-input[type="submit"],
-input[type="reset"],
-input[type="button"],
-a {
-    cursor: pointer;
-}
+/* =========================================================
+   PULSEHIVE — GLOBAL SCROLLBAR STYLING
+   Main document scrollbar stays visible when needed.
+   Nested scrollbars are hidden unless hovered or focused.
+   ========================================================= */
 
-/* Disabled buttons. */
-button:disabled {
-    cursor: not-allowed;
-}
-
-
-/* PulseHive — Global scrollbar styling */
-* {
+/* Main document scrollbar. */
+html {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
 
-::-webkit-scrollbar {
+html::-webkit-scrollbar {
     width: 5px;
     height: 5px;
 }
 
-::-webkit-scrollbar-track {
+html::-webkit-scrollbar-track {
     background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+html::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
     border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.16);
+html::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
-::-webkit-scrollbar-corner {
+html::-webkit-scrollbar-corner {
     background: transparent;
+}
+
+/* Nested scroll containers. */
+.scroll-area {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scroll-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.scroll-area:hover,
+.scroll-area:focus,
+.scroll-area:focus-within {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.scroll-area:hover::-webkit-scrollbar,
+.scroll-area:focus::-webkit-scrollbar,
+.scroll-area:focus-within::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.scroll-area:hover::-webkit-scrollbar-track,
+.scroll-area:focus::-webkit-scrollbar-track,
+.scroll-area:focus-within::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-area:hover::-webkit-scrollbar-thumb,
+.scroll-area:focus::-webkit-scrollbar-thumb,
+.scroll-area:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 9999px;
+}
+
+.scroll-area:hover::-webkit-scrollbar-thumb:hover,
+.scroll-area:focus::-webkit-scrollbar-thumb:hover,
+.scroll-area:focus-within::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.scroll-area::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Permanently hidden scrollbar utility. */
+.scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }
