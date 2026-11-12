@@ -10,9 +10,8 @@ import {
     Trash2,
     ShoppingCart,
     Truck,
-    ShieldCheck,
     Lock,
-    Sparkles,
+    PackageCheck,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 
@@ -20,14 +19,14 @@ const COURIER_OPTIONS = [
     {
         id: 'tcg-locker',
         name: 'Locker to Locker',
-        time: '2-5 business days',
+        time: '2–5 business days',
         price: 80,
         desc: 'Secure 24/7 self-service PUDO locker pickup',
     },
     {
         id: 'tcg-door',
         name: 'Door to Door',
-        time: '1-3 business days',
+        time: '1–3 business days',
         price: 180,
         desc: 'Direct delivery straight to your doorstep',
     },
@@ -67,91 +66,135 @@ export default function CartPage() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-(--color-background) pb-16">
-            <main className="flex flex-col gap-7 px-5 sm:px-6 pt-7">
-                <div className="flex flex-col items-center text-center">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Sparkles
-                            size={12}
-                            className="text-(--color-gold)"
-                        />
-
-                        <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-(--color-gold-dark)">
-                            Your Selection
-                        </span>
-
-                        <Sparkles
-                            size={12}
-                            className="text-(--color-gold)"
-                        />
-                    </div>
-
-                    <h1 className="text-3xl font-serif text-(--color-text)">
-                        Shopping Bag
-                    </h1>
-
-                    <div className="flex items-center gap-1.5 mt-2 text-[10px] uppercase tracking-widest text-(--color-text-muted)">
-                        <Lock size={11} />
-                        Secure Checkout
-                    </div>
-                </div>
-
+        <div className="min-h-screen w-full bg-(--color-background) pb-12">
+            <main className="mx-auto w-full max-w-[1440px] px-5 pt-6 sm:px-6 sm:pt-8">
                 {cart.length === 0 ? (
-                    <div className="w-full border border-(--color-border-strong) bg-(--color-surface) p-10 text-center shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 bg-black flex items-center justify-center text-(--color-gold-light) mb-5 border border-(--color-gold)/30 rounded-full shadow-lg">
-                            <ShoppingCart size={26} />
-                        </div>
-
-                        <h2 className="text-xl font-serif text-(--color-text) mb-2">
-                            Your bag is empty
-                        </h2>
-
-                        <p className="text-xs leading-5 text-(--color-text-muted) max-w-xs mb-7">
-                            Discover our carefully curated collection
-                            of beauty and wellness essentials.
-                        </p>
-
-                        <div className="h-10" />
-
-                        <Link
-                            href="/"
-                            className="button-gold w-full min-h-12"
-                        >
-                            Explore Collection
-                            <ArrowRight size={14} />
-                        </Link>
-                    </div>
-                ) : (
                     <>
-                        <section className="w-full">
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-text-muted)">
-                                    Your Items
+                        <div className="relative mb-6 overflow-hidden border border-(--color-border-strong) bg-[radial-gradient(ellipse_at_top_right,rgba(198,160,83,0.13),transparent_48%),linear-gradient(135deg,#1c1913_0%,#11100e_58%,#0b0b0a_100%)] px-6 py-8 sm:px-10 sm:py-9">
+                            <div className="absolute inset-x-0 top-0 h-px gold-foil" />
+
+                            <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full border border-(--color-gold)/10" />
+                            <div className="pointer-events-none absolute -right-10 -top-20 h-52 w-52 rounded-full border border-(--color-gold)/10" />
+
+                            <div className="relative z-10">
+                                <span className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-light)">
+                                    Your Selection
                                 </span>
 
-                                <span className="text-[10px] text-(--color-gold-dark) font-semibold">
+                                <h1 className="mt-3 font-serif text-2xl leading-tight text-white sm:text-3xl">
+                                    Shopping Bag
+                                </h1>
+
+                                <p className="mt-3 max-w-xl font-body text-xs leading-6 text-white/60 sm:text-sm">
+                                    Review your selected beauty essentials and
+                                    choose your preferred delivery option.
+                                </p>
+
+                                <div className="mt-5 flex items-center gap-2 text-[10px] font-medium tracking-wide text-white/50">
+                                    <Lock
+                                        size={12}
+                                        className="text-(--color-gold-light)"
+                                    />
+                                    Secure checkout
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mx-auto flex w-full max-w-8xl flex-col items-center justify-center border border-(--color-border-strong) bg-(--color-surface) px-6 py-14 text-center shadow-[0_12px_40px_rgba(0,0,0,0.08)] sm:py-16">
+                            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-(--color-gold)/30 bg-[#17140f] text-(--color-gold-light)">
+                                <ShoppingCart size={25} />
+                            </div>
+
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-dark)">
+                                Your Collection
+                            </span>
+
+                            <h2 className="mt-3 font-serif text-2xl text-(--color-text)">
+                                Your bag is empty
+                            </h2>
+
+                            <p className="mt-3 max-w-sm text-xs leading-6 text-(--color-text-muted)">
+                                Discover our carefully curated collection
+                                of beauty and wellness essentials.
+                            </p>
+
+                            <Link
+                                href="/"
+                                className="button-gold mt-7 inline-flex min-h-10 w-auto items-center justify-center gap-2 px-6 py-2.5 text-xs"
+                            >
+                                Explore Collection
+                                <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                    </>
+                ) : (
+                    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)]">
+                        {/* Cart items and header */}
+                        <section className="min-w-0">
+                            <div className="relative mb-6 overflow-hidden border border-(--color-border-strong) bg-[radial-gradient(ellipse_at_top_right,rgba(198,160,83,0.13),transparent_48%),linear-gradient(135deg,#1c1913_0%,#11100e_58%,#0b0b0a_100%)] px-6 py-8 sm:px-10 sm:py-9">
+                                <div className="absolute inset-x-0 top-0 h-px gold-foil" />
+
+                                <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full border border-(--color-gold)/10" />
+                                <div className="pointer-events-none absolute -right-10 -top-20 h-52 w-52 rounded-full border border-(--color-gold)/10" />
+
+                                <div className="relative z-10">
+                                    <span className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-light)">
+                                        Your Selection
+                                    </span>
+
+                                    <h1 className="mt-3 font-serif text-2xl leading-tight text-white sm:text-3xl">
+                                        Shopping Bag
+                                    </h1>
+
+                                    <p className="mt-3 max-w-xl font-body text-xs leading-6 text-white/60 sm:text-sm">
+                                        Review your selected beauty essentials and
+                                        choose your preferred delivery option.
+                                    </p>
+
+                                    <div className="mt-5 flex items-center gap-2 text-[10px] font-medium tracking-wide text-white/50">
+                                        <Lock
+                                            size={12}
+                                            className="text-(--color-gold-light)"
+                                        />
+                                        Secure checkout
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-4 flex items-center justify-between border-b border-(--color-border) pb-3">
+                                <div>
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-gold-dark)">
+                                        Your Items
+                                    </span>
+
+                                    <p className="mt-1 text-xs text-(--color-text-muted)">
+                                        Review your selected products.
+                                    </p>
+                                </div>
+
+                                <span className="text-xs font-semibold text-(--color-text-muted)">
                                     {cart.length} {cart.length === 1 ? 'item' : 'items'}
                                 </span>
                             </div>
 
-                            <div className="flex w-full flex-col gap-3">
+                            <div className="flex flex-col gap-3">
                                 {cart.map((item: any) => (
                                     <div
                                         key={item.id}
-                                        className="group flex w-full items-center justify-between border border-(--color-border-strong) bg-(--color-surface) p-4 sm:p-5 shadow-[0_6px_25px_rgba(0,0,0,0.05)] transition-all duration-300 hover:border-(--color-gold)/40 hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)]"
+                                        className="group flex w-full items-center justify-between gap-4 border border-(--color-border-strong) bg-(--color-surface) p-4 shadow-[0_6px_25px_rgba(0,0,0,0.05)] transition-all duration-300 hover:border-(--color-gold)/40 hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] sm:p-5"
                                     >
-                                        <div className="flex flex-col gap-1 pr-4 min-w-0">
-                                            <h2 className="text-xs sm:text-sm font-bold text-(--color-text) line-clamp-2">
+                                        <div className="min-w-0 flex-1">
+                                            <h2 className="line-clamp-2 text-xs font-bold text-(--color-text) sm:text-sm">
                                                 {item.name}
                                             </h2>
 
-                                            <p className="text-[10px] uppercase tracking-wider text-(--color-gold-dark) font-semibold">
+                                            <p className="mt-2 text-[10px] font-semibold tracking-wide text-(--color-gold-dark)">
                                                 R{Number(item.price).toFixed(2)} each
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                                            <div className="flex items-center gap-2 border border-(--color-border-strong) bg-(--color-background) px-2.5 py-1.5">
+                                        <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+                                            <div className="flex items-center gap-2 border border-(--color-border-strong) bg-(--color-background) px-2.5 py-2">
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -160,13 +203,13 @@ export default function CartPage() {
                                                             item.quantity - 1
                                                         )
                                                     }
-                                                    className="text-(--color-text-muted) hover:text-(--color-gold-dark) transition"
+                                                    className="text-(--color-text-muted) transition hover:text-(--color-gold-dark)"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     <Minus size={12} />
                                                 </button>
 
-                                                <span className="w-5 text-center text-xs font-bold text-(--color-text)">
+                                                <span className="w-5 text-center text-xs font-bold tabular-nums text-(--color-text)">
                                                     {item.quantity}
                                                 </span>
 
@@ -178,7 +221,7 @@ export default function CartPage() {
                                                             item.quantity + 1
                                                         )
                                                     }
-                                                    className="text-(--color-text-muted) hover:text-(--color-gold-dark) transition"
+                                                    className="text-(--color-text-muted) transition hover:text-(--color-gold-dark)"
                                                     aria-label="Increase quantity"
                                                 >
                                                     <Plus size={12} />
@@ -190,7 +233,7 @@ export default function CartPage() {
                                                 onClick={() =>
                                                     removeFromCart(item.id)
                                                 }
-                                                className="text-(--color-text-muted)/50 hover:text-red-500 transition p-1"
+                                                className="p-1 text-(--color-text-muted)/50 transition hover:text-red-500"
                                                 aria-label="Remove item"
                                             >
                                                 <Trash2 size={16} />
@@ -199,36 +242,60 @@ export default function CartPage() {
                                     </div>
                                 ))}
                             </div>
-                        </section>
 
-                        <section className="w-full border border-(--color-border-strong) bg-(--color-surface) p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-                            <div className="flex flex-col gap-4 mb-5">
-                                <div className="flex items-center justify-between gap-4">
+                            {/* Delivery reassurance */}
+                            <div className="mt-5 border border-(--color-border) bg-(--color-surface)/50 p-4">
+                                <div className="flex items-start gap-3">
+                                    <PackageCheck
+                                        size={17}
+                                        className="mt-0.5 shrink-0 text-(--color-gold-dark)"
+                                    />
+
                                     <div>
-                                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-gold-dark) flex items-center gap-2 mb-1.5">
-                                            <Truck size={15} />
-                                            Delivery Method
-                                        </label>
+                                        <p className="text-xs font-semibold text-(--color-text)">
+                                            Carefully prepared for delivery
+                                        </p>
 
-                                        <p className="text-xs text-(--color-text-muted)">
-                                            Select your preferred delivery option.
+                                        <p className="mt-1 text-[11px] leading-5 text-(--color-text-muted)">
+                                            Your selected products will be
+                                            prepared for dispatch once your
+                                            order has been confirmed.
                                         </p>
                                     </div>
+                                </div>
+                            </div>
+                        </section>
 
-                                    <div className="relative w-16 h-8 shrink-0 overflow-hidden border border-(--color-border-strong) bg-white flex items-center justify-center">
-                                        <Image
-                                            src="/courier.jpg"
-                                            alt="The Courier Guy"
-                                            fill
-                                            className="object-contain p-1"
-                                        />
-                                    </div>
+                        {/* Delivery and order summary */}
+                        <section className="min-w-0 border border-(--color-border-strong) bg-(--color-surface) p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] sm:p-6 lg:sticky lg:top-28">
+                            <div className="mb-5 flex items-center justify-between gap-4">
+                                <div>
+                                    <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-(--color-gold-dark)">
+                                        <Truck size={15} />
+                                        Delivery Method
+                                    </label>
+
+                                    <p className="mt-1.5 text-xs text-(--color-text-muted)">
+                                        Choose your preferred delivery option.
+                                    </p>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider text-(--color-text-soft)">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-(--color-gold)" />
+                                <div className="relative flex h-10 w-20 shrink-0 items-center justify-center overflow-hidden border border-(--color-border) bg-white p-1.5">
+                                    <Image
+                                        src="/courier-guy.svg"
+                                        alt="The Courier Guy"
+                                        fill
+                                        className="object-contain p-1.5"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-4 flex items-center gap-2 border-b border-(--color-border) pb-4">
+                                <span className="h-1.5 w-1.5 rounded-full bg-(--color-gold)" />
+
+                                <span className="text-[10px] font-semibold tracking-wide text-(--color-text-muted)">
                                     The Courier Guy
-                                </div>
+                                </span>
                             </div>
 
                             <div className="space-y-3">
@@ -243,13 +310,13 @@ export default function CartPage() {
                                             onClick={() =>
                                                 handleSelectShipping(option)
                                             }
-                                            className={`w-full flex items-center justify-between gap-4 p-4 border transition-all duration-300 text-left ${
+                                            className={`flex w-full items-center justify-between gap-4 border p-4 text-left transition-all duration-300 ${
                                                 isSelected
                                                     ? 'border-(--color-gold) bg-[#1a160f] shadow-[0_8px_25px_rgba(216,181,109,0.12)]'
                                                     : 'border-(--color-border-strong) bg-(--color-background) hover:border-(--color-gold)/50'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex min-w-0 items-center gap-3">
                                                 <div
                                                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
                                                         isSelected
@@ -264,7 +331,7 @@ export default function CartPage() {
 
                                                 <div className="min-w-0">
                                                     <span
-                                                        className={`text-xs sm:text-sm font-bold block ${
+                                                        className={`block text-xs font-bold sm:text-sm ${
                                                             isSelected
                                                                 ? 'text-white'
                                                                 : 'text-(--color-text)'
@@ -274,7 +341,7 @@ export default function CartPage() {
                                                     </span>
 
                                                     <span
-                                                        className={`text-[10px] block mt-0.5 ${
+                                                        className={`mt-1 block text-[10px] leading-5 ${
                                                             isSelected
                                                                 ? 'text-white/65'
                                                                 : 'text-(--color-text-muted)'
@@ -284,7 +351,7 @@ export default function CartPage() {
                                                     </span>
 
                                                     <span
-                                                        className={`text-[9px] uppercase tracking-wider block mt-1 ${
+                                                        className={`mt-1.5 block text-[9px] font-semibold tracking-wider ${
                                                             isSelected
                                                                 ? 'text-(--color-gold-light)'
                                                                 : 'text-(--color-gold-dark)'
@@ -296,7 +363,7 @@ export default function CartPage() {
                                             </div>
 
                                             <span
-                                                className={`text-xs sm:text-sm font-bold shrink-0 ${
+                                                className={`shrink-0 text-sm font-bold tabular-nums ${
                                                     isSelected
                                                         ? 'text-(--color-gold-light)'
                                                         : 'text-(--color-gold-dark)'
@@ -309,13 +376,14 @@ export default function CartPage() {
                                 })}
                             </div>
 
-                            <div className="space-y-3 pt-6 mt-6 border-t border-(--color-border)">
+                            {/* Order summary */}
+                            <div className="mt-6 space-y-3 border-t border-(--color-border) pt-5">
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="text-(--color-text-muted)">
                                         Subtotal
                                     </span>
 
-                                    <span className="font-semibold text-(--color-text)">
+                                    <span className="font-semibold tabular-nums text-(--color-text)">
                                         R{subtotal.toFixed(2)}
                                     </span>
                                 </div>
@@ -325,52 +393,42 @@ export default function CartPage() {
                                         Delivery
                                     </span>
 
-                                    <span className="font-semibold text-(--color-text)">
+                                    <span className="font-semibold tabular-nums text-(--color-text)">
                                         {selectedShipping
                                             ? `R${selectedShipping.price.toFixed(2)}`
                                             : 'Select method'}
                                     </span>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-4 mt-2 border-t border-dashed border-(--color-border)">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-(--color-text)">
+                                <div className="flex items-center justify-between border-t border-dashed border-(--color-border) pt-4">
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-text)">
                                         Total to Pay
                                     </span>
 
-                                    <span className="text-xl font-bold text-(--color-gold-dark)">
+                                    <span className="font-serif text-2xl font-bold tabular-nums text-(--color-gold-dark)">
                                         R{totalToPay.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="h-10" />
-
-                            {!selectedShipping ? (
-                                <div className="w-full h-12 mt-7 flex items-center justify-center gap-2 bg-[#2a2419] border border-[#4a402d] text-[10px] font-bold uppercase tracking-wider text-[#8f846f]">
-                                    Select delivery method to continue
-                                </div>
-                            ) : (
-                                <Link
-                                    href="/checkout"
-                                    className="button-gold mt-7 w-full min-h-12 active:scale-[0.99]"
-                                >
-                                    Continue to Checkout
-                                    <ArrowRight size={16} />
-                                </Link>
-                            )}
-
-                            <div className="flex items-center justify-center gap-1.5 mt-5 text-[9px] uppercase tracking-wider text-(--color-text-muted)">
-                                <ShieldCheck
-                                    size={13}
-                                    className="text-(--color-gold-dark)"
-                                />
-
-                                <span>
-                                    Encrypted & secure checkout processing
-                                </span>
+                            {/* Checkout */}
+                            <div className="mt-6 flex flex-col">
+                                {!selectedShipping ? (
+                                    <div className="flex min-h-10 w-full items-center justify-center border border-[#4a402d] bg-[#2a2419] px-5 py-2.5 text-center text-xs font-semibold tracking-wide text-[#a99b7d]">
+                                        Select a delivery method to continue
+                                    </div>
+                                ) : (
+                                    <Link
+                                        href="/checkout"
+                                        className="button-gold flex min-h-10 w-full items-center justify-center gap-2 px-5 py-2.5 text-xs active:scale-[0.99]"
+                                    >
+                                        Continue to Checkout
+                                        <ArrowRight size={14} />
+                                    </Link>
+                                )}
                             </div>
                         </section>
-                    </>
+                    </div>
                 )}
             </main>
         </div>
