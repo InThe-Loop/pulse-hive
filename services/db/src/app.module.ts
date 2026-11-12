@@ -8,6 +8,7 @@ import { ProductsModule } from './products/products.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { IdentityModule } from './identity/identity.module';
 import { AccessModule } from './access/access.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
     imports: [
@@ -32,6 +33,7 @@ import { AccessModule } from './access/access.module';
         ProductsModule,
         IdentityModule,
         AccessModule,
+        CustomersModule,
     ],
 })
 

@@ -110,6 +110,8 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       ADMIN_APP_URL: ${ADMIN_APP_URL}
       EMAIL_FROM: ${EMAIL_FROM}
+      CUSTOMER_JWT_SECRET: ${CUSTOMER_JWT_SECRET}
+      CUSTOMER_OTP_SECRET: ${CUSTOMER_OTP_SECRET}
     command: sh -c "pnpm start:dev"
     depends_on:
       postgres:
