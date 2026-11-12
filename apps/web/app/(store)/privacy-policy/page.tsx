@@ -1,8 +1,8 @@
 import { PolicyPage } from '@/components/policy-page';
 
 export const metadata = {
-    title: 'Privacy Policy | Glowa Vee Boutique',
-    description: 'Privacy and POPIA Policy for Glowa Vee Boutique.',
+    title: 'Privacy Policy | Glowa Vee',
+    description: 'Privacy and POPIA Policy for Glowa Vee.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -11,12 +11,12 @@ export default function PrivacyPolicyPage() {
             eyebrow="Your Privacy"
             title="Privacy Policy"
             icon="privacy"
-            description="How Glowa Vee Boutique collects, uses and protects your personal information."
+            description="How Glowa Vee collects, uses and protects your personal information."
             sections={[
                 {
                     title: 'Introduction',
                     content: [
-                        'Glowa Vee Boutique respects your privacy and is committed to protecting your personal information.',
+                        'Glowa Vee respects your privacy and is committed to protecting your personal information.',
                         'This Privacy Policy explains how we collect, use, store and protect personal information when you use our website, place an order or communicate with us.',
                         'We process personal information in accordance with applicable South African privacy laws, including the Protection of Personal Information Act 4 of 2013 (POPIA), where applicable.',
                     ],
@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
                 {
                     title: 'Contact Us',
                     content: [
-                        'If you have questions about this Privacy Policy or wish to raise a privacy-related concern, please contact Glowa Vee Boutique using the contact details provided on this website.',
+                        'If you have questions about this Privacy Policy or wish to raise a privacy-related concern, please contact Glowa Vee using the contact details provided on this website.',
                     ],
                 },
             ]}

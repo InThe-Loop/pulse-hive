@@ -1,8 +1,8 @@
 import { PolicyPage } from '@/components/policy-page';
 
 export const metadata = {
-    title: 'Refund & Returns | Glowa Vee Boutique',
-    description: 'Refund, cancellation and returns policy for Glowa Vee Boutique.',
+    title: 'Refund & Returns | Glowa Vee',
+    description: 'Refund, cancellation and returns policy for Glowa Vee.',
 };
 
 export default function RefundCancellationReturnsPage() {
@@ -16,7 +16,7 @@ export default function RefundCancellationReturnsPage() {
                 {
                     title: 'Our General Refund Policy',
                     content: [
-                        'Glowa Vee Boutique generally does not offer refunds for change-of-mind purchases, incorrect product selection or products that the customer simply no longer wants.',
+                        'Glowa Vee generally does not offer refunds for change-of-mind purchases, incorrect product selection or products that the customer simply no longer wants.',
                         'This policy is made available to customers before purchase so that customers can review our terms before completing an order.',
                         'Nothing in this policy is intended to remove or limit any consumer right or remedy that cannot lawfully be excluded under applicable South African law.',
                     ],

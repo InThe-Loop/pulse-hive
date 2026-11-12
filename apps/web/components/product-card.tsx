@@ -1,8 +1,9 @@
-
 'use client';
 
 import { useCart } from '@/context/cart-context';
-import { ShoppingBag } from 'lucide-react';
+import {
+    ShoppingBag,
+} from 'lucide-react';
 
 type ProductCardData = {
     id: string;
@@ -62,33 +63,33 @@ export function ProductCard({
                     )}
                 </div>
 
-                {/* Price, size and add to bag */}
+                {/* Price, size and buy */}
                 <div className="mt-5 flex flex-col gap-3 border-t border-(--color-border) pt-4 sm:flex-row sm:items-center">
                     {/* Price and product size */}
-                    <div className="flex w-full min-w-0 items-center justify-center gap-2 sm:flex-[2] sm:justify-start">
+                    <div className="flex w-full min-w-0 items-center justify-center gap-2 sm:flex-1 sm:justify-start">
                         <span className="shrink-0 whitespace-nowrap gold-foil-text font-body text-base font-bold tracking-tight sm:text-lg">
                             R{product.price}
                         </span>
 
                         {product.size?.trim() && (
-                            <span className="min-w-0 break-words border-l border-(--color-border-strong) pl-2 font-body text-[10px] font-medium leading-relaxed tracking-wide text-(--color-text-muted)">
+                            <span className="min-w-0 wrap-break-word border-l border-(--color-border-strong) pl-2 font-body text-[10px] font-medium leading-relaxed tracking-wide text-(--color-text-muted)">
                                 {product.size.trim()}
                             </span>
                         )}
                     </div>
 
-                    {/* Add to bag */}
+                    {/* Buy */}
                     <button
                         type="button"
                         onClick={() => addToCart(product)}
-                        className="button-gold min-h-10 w-full cursor-pointer px-3.5 py-2 font-body text-[9px] sm:min-w-0 sm:flex-[3] sm:px-2"
-                        aria-label={`Add ${product.name} to bag`}
+                        className="button-gold flex min-h-8.5 w-full cursor-pointer items-center justify-center px-3 py-0.5 font-body text-[9px] font-bold uppercase tracking-[0.16em] transition-all sm:w-auto sm:min-w-[76px] sm:px-4"
+                        aria-label={`Buy ${product.name}`}
                     >
                         <ShoppingBag
                             size={13}
                             strokeWidth={1.8}
                         />
-                        Add to bag
+                        Buy
                     </button>
                 </div>
             </div>

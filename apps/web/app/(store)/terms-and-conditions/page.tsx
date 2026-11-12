@@ -1,8 +1,8 @@
 import { PolicyPage } from '@/components/policy-page';
 
 export const metadata = {
-    title: 'Terms & Conditions | Glowa Vee Boutique',
-    description: 'Terms and Conditions for Glowa Vee Boutique.',
+    title: 'Terms & Conditions | Glowa Vee',
+    description: 'Terms and Conditions for Glowa Vee.',
 };
 
 export default function TermsAndConditionsPage() {
@@ -16,14 +16,14 @@ export default function TermsAndConditionsPage() {
                 {
                     title: 'Introduction',
                     content: [
-                        'These Terms and Conditions govern the use of the Glowa Vee Boutique website and the purchase of products through our online store.',
-                        'Glowa Vee Boutique is the trading name of MISSVEE TMI GROUP (PTY) LTD. By using this website or placing an order, you acknowledge that you have read and agreed to these Terms and Conditions.',
+                        'These Terms and Conditions govern the use of the Glowa Vee website and the purchase of products through our online store.',
+                        'Glowa Vee is the trading name of MISSVEE TMI GROUP (PTY) LTD. By using this website or placing an order, you acknowledge that you have read and agreed to these Terms and Conditions.',
                     ],
                 },
                 {
                     title: 'Our Products',
                     content: [
-                        'Glowa Vee Boutique sells and distributes skincare and beauty products.',
+                        'Glowa Vee sells and distributes skincare and beauty products.',
                         'Product descriptions, images, sizes, colours, packaging and availability are provided as accurately as reasonably possible. Minor variations in packaging or product appearance may occur.',
                         'Customers are responsible for reading product descriptions and available usage instructions before purchasing.',
                     ],
@@ -69,7 +69,7 @@ export default function TermsAndConditionsPage() {
                 {
                     title: 'Intellectual Property',
                     content: [
-                        'The Glowa Vee Boutique name, branding, logos, images, text and other website content belong to or are used by Glowa Vee Boutique with appropriate rights.',
+                        'The Glowa Vee name, branding, logos, images, text and other website content belong to or are used by Glowa Vee with appropriate rights.',
                         'Website content may not be copied, reproduced, distributed or commercially used without prior written permission.',
                     ],
                 },
@@ -89,7 +89,7 @@ export default function TermsAndConditionsPage() {
                 {
                     title: 'Contact',
                     content: [
-                        'If you have questions regarding these Terms and Conditions, please contact Glowa Vee Boutique using the contact details provided on this website.',
+                        'If you have questions regarding these Terms and Conditions, please contact Glowa Vee using the contact details provided on this website.',
                     ],
                 },
             ]}

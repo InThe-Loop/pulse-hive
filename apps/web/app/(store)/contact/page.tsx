@@ -1,238 +1,187 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import {
-    PhoneCall,
+    ArrowUpRight,
+    BriefcaseBusiness,
+    Handshake,
     Mail,
     MapPin,
-    Send,
-    CheckCircle2,
-    Loader2,
-    ShoppingCart,
+    PhoneCall,
+    Headset,
+    Store,
 } from 'lucide-react';
-import { useCart } from '@/context/cart-context';
+
+const businessEnquiries = [
+    {
+        icon: Store,
+        title: 'Wholesale & Resellers',
+        description:
+            'Interested in stocking Glowa Vee products or becoming an authorised reseller? We would love to hear from you.',
+    },
+    {
+        icon: Handshake,
+        title: 'Partnerships & Collaborations',
+        description:
+            'For brand partnerships, collaborations, marketing opportunities and other commercial proposals.',
+    },
+    {
+        icon: BriefcaseBusiness,
+        title: 'General Business Enquiries',
+        description:
+            'For suppliers, business proposals, corporate enquiries and other professional correspondence.',
+    },
+];
 
 export default function ContactPage() {
-    const { cart } = useCart();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
-        setTimeout(() => {
-            setLoading(false);
-            setSubmitted(true);
-            setName('');
-            setEmail('');
-            setMessage('');
-        }, 1000);
-    };
-
     return (
-        <div className="w-full min-h-screen bg-(--color-background) pb-12 box-border">
-            <main className="flex flex-col gap-6 px-6 pt-6 max-w-full mx-auto w-full box-border">
+        <div className="min-h-screen w-full bg-(--color-background) pb-12">
+            <main className="mx-auto w-full max-w-[1440px] px-5 pt-6 sm:px-6 sm:pt-8">
+                <div className="space-y-6">
 
-                {/* =====================================================
-                    PAGE HEADER
-                    ===================================================== */}
+                    {/* Business contact header */}
+                    <div className="relative mb-6 overflow-hidden border border-(--color-border-strong) bg-[radial-gradient(ellipse_at_top_right,rgba(198,160,83,0.13),transparent_48%),linear-gradient(135deg,#1c1913_0%,#11100e_58%,#0b0b0a_100%)] px-6 py-8 sm:px-10 sm:py-9">
+                        <div className="absolute inset-x-0 top-0 h-px gold-foil" />
 
-                <div className="flex flex-col gap-1 items-center text-center">
-                    <div className="w-12 h-12 bg-(--color-surface) flex items-center justify-center text-(--color-gold-dark) mb-2 rounded-full border border-(--color-border)">
-                        <PhoneCall size={20} />
+                        <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full border border-(--color-gold)/10" />
+                        <div className="pointer-events-none absolute -right-10 -top-20 h-52 w-52 rounded-full border border-(--color-gold)/10" />
+
+                        <div className="relative z-10">
+                            <span className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-light)">
+                                Let's Work Together
+                            </span>
+
+                            <h1 className="mt-3 font-serif text-2xl leading-tight text-white sm:text-3xl">
+                                Business Enquiries
+                            </h1>
+
+                            <p className="mt-3 max-w-xl font-body text-xs leading-6 text-white/60 sm:text-sm">
+                                We welcome meaningful partnerships, wholesale opportunities
+                                and business conversations. Connect with Glowa Vee and let's
+                                explore what we can create together.
+                            </p>
+                        </div>
                     </div>
 
-                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-dark)">
-                        Get in Touch
-                    </span>
+                    {/* Business enquiry categories */}
+                    <section className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                        {businessEnquiries.map((item) => {
+                            const Icon = item.icon;
 
-                    <h1 className="text-2xl font-serif text-(--color-text)">
-                        Contact Concierge
-                    </h1>
+                            return (
+                                <article
+                                    key={item.title}
+                                    className="relative border border-(--color-border-strong) border-t-2 border-t-(--color-gold) bg-(--color-surface) p-6 sm:p-8"
+                                >
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-(--color-border) bg-(--color-background) text-(--color-gold-dark)">
+                                        <Icon size={19} />
+                                    </div>
 
-                    <p className="text-xs text-(--color-text-muted)">
-                        We are here to answer your questions and assist with your luxury routine.
-                    </p>
-                </div>
+                                    <h2 className="mt-6 font-serif text-lg text-(--color-text)">
+                                        {item.title}
+                                    </h2>
 
-                {/* =====================================================
-                    CONTACT FORM - FULL WIDTH
-                    ===================================================== */}
+                                    <p className="mt-3 font-body text-xs leading-6 text-(--color-text-muted)">
+                                        {item.description}
+                                    </p>
+                                </article>
+                            );
+                        })}
+                    </section>
 
-                <div className="w-full border border-(--color-border-strong) p-6 shadow-xs box-border">
+                    {/* Business contact details */}
+                    <section className="grid grid-cols-1 gap-6 border border-(--color-border-strong) bg-(--color-surface) p-6 sm:p-8 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:p-10">
+                        <div>
+                            <span className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-(--color-gold-dark)">
+                                Get in Touch
+                            </span>
 
-                    {submitted ? (
-                        <div className="w-full py-12 flex flex-col items-center justify-center text-center">
-
-                            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center border border-emerald-200 mb-3">
-                                <CheckCircle2 size={24} />
-                            </div>
-
-                            <h3 className="text-base font-serif text-(--color-text)">
-                                Message Received
-                            </h3>
-
-                            <p className="text-xs text-(--color-text-muted) max-w-sm text-center mt-2">
-                                Thank you for reaching out. Our concierge team will get back to your inquiry shortly.
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={() => setSubmitted(false)}
-                                className="mt-6 px-6 py-2.5 bg-(--color-surface) text-xs font-bold uppercase tracking-wider border border-(--color-border) text-(--color-gold-dark) transition hover:bg-(--color-background)"
-                            >
-                                Send Another Message
-                            </button>
-
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-(--color-text) mb-2">
-                                Send a Message
+                            <h2 className="mt-3 font-serif text-xl text-(--color-text) sm:text-2xl">
+                                Let's start a conversation.
                             </h2>
 
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">
-                                    Your Name *
-                                </label>
+                            <p className="mt-3 max-w-lg font-body text-xs leading-6 text-(--color-text-muted)">
+                                For business proposals, wholesale enquiries
+                                and partnership opportunities, reach our
+                                team directly. Please include a brief
+                                introduction and details of your enquiry.
+                            </p>
 
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10]"
-                                    placeholder="Full Name"
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">
-                                    Email Address *
-                                </label>
-
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10]"
-                                    placeholder="name@example.com"
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase tracking-wider text-(--color-text)">
-                                    Message *
-                                </label>
-
-                                <textarea
-                                    rows={4}
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    className="w-full border border-(--color-border) px-4 py-3 text-xs sm:text-sm outline-none transition focus:border-[#3d2c10] resize-none"
-                                    placeholder="How can we help you?"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full h-12 mt-2 inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#3d2c10] to-[#f3c54b] text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#3d2c10]/10 transition hover:brightness-105 disabled:opacity-50"
+                            <a
+                                href="mailto:info@glowavee.store"
+                                className="mt-7 inline-flex items-center gap-3 border-b border-(--color-gold) pb-2 font-body text-sm font-semibold text-(--color-text) transition-colors hover:text-(--color-gold-dark)"
                             >
-                                {loading ? (
-                                    <>
-                                        <Loader2 size={16} className="animate-spin" />
-                                        Sending...
-                                    </>
-                                ) : (
-                                    <>
-                                        Send Message
-                                        <Send size={14} />
-                                    </>
-                                )}
-                            </button>
+                                <Mail size={17} className="text-(--color-gold-dark)" />
+                                info@glowavee.store
+                                <ArrowUpRight size={15} className="text-(--color-gold-dark)" />
+                            </a>
+                        </div>
 
-                        </form>
-                    )}
+                        <div className="space-y-6 border-t border-(--color-border) pt-6 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-(--color-border) bg-(--color-background) text-(--color-gold-dark)">
+                                    <PhoneCall size={17} />
+                                </div>
+
+                                <div>
+                                    <span className="block font-body text-[10px] font-bold uppercase tracking-wider text-(--color-text-muted)">
+                                        Telephone
+                                    </span>
+
+                                    <a
+                                        href="tel:+27681037459"
+                                        className="mt-1 block font-body text-sm text-(--color-text) transition-colors hover:text-(--color-gold-dark)"
+                                    >
+                                        +27 (0) 68 103 7459
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-(--color-border) bg-(--color-background) text-(--color-gold-dark)">
+                                    <MapPin size={17} />
+                                </div>
+
+                                <div>
+                                    <span className="block font-body text-[10px] font-bold uppercase tracking-wider text-(--color-text-muted)">
+                                        Location
+                                    </span>
+
+                                    <p className="mt-1 font-body text-sm leading-6 text-(--color-text)">
+                                        19 11th Ave, Northmead,
+                                        Benoni, South Africa
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Customer support direction */}
+                    <section className="flex flex-col gap-5 border border-(--color-border) bg-(--color-surface) p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-(--color-border) bg-(--color-background) text-(--color-gold-dark)">
+                                <Headset size={19} />
+                            </div>
+
+                            <div>
+                                <h2 className="font-serif text-base text-(--color-text)">
+                                    Looking for customer support?
+                                </h2>
+
+                                <p className="mt-1 max-w-xl font-body text-xs leading-6 text-(--color-text-muted)">
+                                    For order enquiries, product guidance
+                                    and general assistance, our concierge
+                                    team is available through the floating
+                                    support icon.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="shrink-0 font-body text-[10px] font-bold uppercase tracking-wider text-(--color-gold-dark)">
+                            Your glow. Your way.
+                        </p>
+                    </section>
                 </div>
-
-                {/* =====================================================
-                    DIRECT CHANNELS - FULL WIDTH BELOW FORM
-                    ===================================================== */}
-
-                <div className="w-full border border-(--color-border-strong) p-6 shadow-xs box-border">
-
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-(--color-text) mb-6 text-center">
-                        Direct Channels
-                    </h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-
-                        {/* Email */}
-                        <div className="flex flex-col items-center text-center gap-2">
-                            <Mail
-                                size={20}
-                                className="text-(--color-gold-dark)"
-                            />
-
-                            <div>
-                                <span className="text-[10px] uppercase font-bold text-(--color-text-muted) block mb-1">
-                                    Email Us
-                                </span>
-
-                                <span className="text-xs text-(--color-text)">
-                                    info@glowavee.store
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Phone */}
-                        <div className="flex flex-col items-center text-center gap-2">
-                            <PhoneCall
-                                size={20}
-                                className="text-(--color-gold-dark)"
-                            />
-
-                            <div>
-                                <span className="text-[10px] uppercase font-bold text-(--color-text-muted) block mb-1">
-                                    Call Support
-                                </span>
-
-                                <span className="text-xs text-(--color-text)">
-                                    +27 (0) 68 103 7459
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Location */}
-                        <div className="flex flex-col items-center text-center gap-2">
-                            <MapPin
-                                size={20}
-                                className="text-(--color-gold-dark)"
-                            />
-
-                            <div>
-                                <span className="text-[10px] uppercase font-bold text-(--color-text-muted) block mb-1">
-                                    Studio Location
-                                </span>
-
-                                <span className="text-xs text-(--color-text)">
-                                    19 11th Ave, Northmead, Benoni, South Africa
-                                </span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
             </main>
         </div>
     );

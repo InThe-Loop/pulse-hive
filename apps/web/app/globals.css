@@ -400,8 +400,83 @@ a[class*="to-[#f3c54b]"]:hover {
 
 /* =========================================================
    SCROLLBARS
+   Main document scrollbar stays visible when needed.
+   Nested scrollbars are hidden unless hovered or focused.
    ========================================================= */
 
+/* Main document scrollbar */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #80663e #070707;
+}
+
+html::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+html::-webkit-scrollbar-track {
+    background: #070707;
+}
+
+html::-webkit-scrollbar-thumb {
+    border: 2px solid #070707;
+    border-radius: 999px;
+    background: #80663e;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+}
+
+/* Nested scroll containers */
+.scroll-area {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scroll-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.scroll-area:hover,
+.scroll-area:focus,
+.scroll-area:focus-within {
+    scrollbar-width: thin;
+    scrollbar-color: #80663e transparent;
+}
+
+.scroll-area:hover::-webkit-scrollbar,
+.scroll-area:focus::-webkit-scrollbar,
+.scroll-area:focus-within::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+.scroll-area:hover::-webkit-scrollbar-track,
+.scroll-area:focus::-webkit-scrollbar-track,
+.scroll-area:focus-within::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-area:hover::-webkit-scrollbar-thumb,
+.scroll-area:focus::-webkit-scrollbar-thumb,
+.scroll-area:focus-within::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: #80663e;
+    background-clip: padding-box;
+}
+
+.scroll-area:hover::-webkit-scrollbar-thumb:hover,
+.scroll-area:focus::-webkit-scrollbar-thumb:hover,
+.scroll-area:focus-within::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+    background-clip: padding-box;
+}
+
+/* Permanently hidden scrollbar utility */
 .scrollbar-hide {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -409,24 +484,6 @@ a[class*="to-[#f3c54b]"]:hover {
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
-}
-
-::-webkit-scrollbar {
-    width: 7px;
-}
-
-::-webkit-scrollbar-track {
-    background: #070707;
-}
-
-::-webkit-scrollbar-thumb {
-    border: 2px solid #070707;
-    border-radius: 999px;
-    background: #80663e;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-gold);
 }
 
 /* =========================================================
