@@ -1,99 +1,163 @@
-/**
- * Centralized API client configured to communicate with your API gateway.
- * Sends credentials with requests so cookies/sessions are correctly handled.
- */
+const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const CUSTOMER_AUTH_BASE_URL =
+    process.env.NEXT_PUBLIC_CUSTOMER_AUTH_URL || 'http://localhost:4001';
 
-interface RequestOptions extends RequestInit {
+export interface RequestOptions {
     params?: Record<string, string | number | boolean>;
+    headers?: Record<string, string>;
 }
 
 class ApiClient {
-    private baseUrl: string;
+    constructor(
+        private readonly baseUrl: string,
+        private readonly tokenStorageKey: string
+    ) {}
 
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl.replace(/\/+$/, '');
-    }
-
-    private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-        const { params, headers, ...customOptions } = options;
-
-        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-        let url = `${this.baseUrl}${cleanEndpoint}`;
-
-        if (params) {
-            const searchParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                searchParams.append(key, String(value));
-            });
-            url += `?${searchParams.toString()}`;
+    private getToken(): string | null {
+        if (typeof window === 'undefined') {
+            return null;
         }
 
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        return localStorage.getItem(this.tokenStorageKey);
+    }
 
-        const defaultHeaders: Record<string, string> = {
+    private buildUrl(
+        endpoint: string,
+        params?: RequestOptions['params']
+    ): string {
+        const url = new URL(
+            `${this.baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`
+        );
+
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                url.searchParams.set(key, String(value));
+            });
+        }
+
+        return url.toString();
+    }
+
+    private async request<T>(
+        method: string,
+        endpoint: string,
+        body?: unknown,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        const token = this.getToken();
+
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(headers as Record<string, string>),
+            ...options.headers,
         };
 
-        const response = await fetch(url, {
-            ...customOptions,
-            headers: defaultHeaders,
-            credentials: 'include', // Ensure cookies/sessions are sent and accepted across cross-origin/credentials
-        });
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
 
-        let errorData: any = {};
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
-            errorData = await response.json().catch(() => ({}));
-        } else {
-            const textResponse = await response.text().catch(() => '');
-            errorData = { message: textResponse || response.statusText };
+        const response = await fetch(
+            this.buildUrl(endpoint, options.params),
+            {
+                method,
+                headers,
+                credentials: 'include',
+                ...(body !== undefined
+                    ? { body: JSON.stringify(body) }
+                    : {}),
+            }
+        );
+
+        const responseText = await response.text();
+
+        let data: unknown = null;
+
+        if (responseText) {
+            try {
+                data = JSON.parse(responseText);
+            } catch {
+                data = responseText;
+            }
         }
 
         if (!response.ok) {
-            const detailedMessage = 
-                errorData.message || 
-                errorData.error || 
-                (typeof errorData === 'string' ? errorData : null) || 
-                `API Error: ${response.status} ${response.statusText}`;
-            
-            throw new Error(detailedMessage);
+            const errorData =
+                typeof data === 'object' && data !== null
+                    ? (data as Record<string, unknown>)
+                    : {};
+
+            const message =
+                typeof errorData.message === 'string'
+                    ? errorData.message
+                    : typeof data === 'string'
+                      ? data
+                      : `Request failed with status ${response.status}`;
+
+            const error = new Error(message) as Error & {
+                status?: number;
+                code?: string;
+            };
+
+            error.status = response.status;
+
+            if (typeof errorData.code === 'string') {
+                error.code = errorData.code;
+            }
+
+            throw error;
         }
 
-        if (response.status === 204) {
-            return {} as T;
-        }
-
-        return errorData as T;
+        return data as T;
     }
 
-    public async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-        return this.request<T>(endpoint, { ...options, method: 'GET' });
+    get<T>(
+        endpoint: string,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        return this.request<T>('GET', endpoint, undefined, options);
     }
 
-    public async post<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
-        return this.request<T>(endpoint, {
-            ...options,
-            method: 'POST',
-            body: body ? JSON.stringify(body) : undefined,
-        });
+    post<T>(
+        endpoint: string,
+        body?: unknown,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        return this.request<T>('POST', endpoint, body, options);
     }
 
-    public async put<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
-        return this.request<T>(endpoint, {
-            ...options,
-            method: 'PUT',
-            body: body ? JSON.stringify(body) : undefined,
-        });
+    put<T>(
+        endpoint: string,
+        body?: unknown,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        return this.request<T>('PUT', endpoint, body, options);
     }
 
-    public async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-        return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    patch<T>(
+        endpoint: string,
+        body?: unknown,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        return this.request<T>('PATCH', endpoint, body, options);
+    }
+
+    delete<T>(
+        endpoint: string,
+        options: RequestOptions = {}
+    ): Promise<T> {
+        return this.request<T>('DELETE', endpoint, undefined, options);
     }
 }
 
-export const apiClient = new ApiClient(API_BASE_URL);
+// Existing storefront/gateway requests retain their own token.
+export const apiClient = new ApiClient(
+    API_BASE_URL,
+    'auth_token'
+);
+
+// Customer authentication goes directly to the Auth service.
+export const customerApiClient = new ApiClient(
+    CUSTOMER_AUTH_BASE_URL,
+    'customer_auth_token'
+);

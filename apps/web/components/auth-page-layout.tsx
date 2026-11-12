@@ -24,10 +24,10 @@ export function AuthPageLayout({
     children,
 }: AuthPageLayoutProps) {
     return (
-        <main className="grid h-dvh min-h-0 w-full grid-cols-1 overflow-hidden lg:grid-cols-[55fr_45fr]">
-            {/* Brand panel - remains static */}
+        <main className="grid min-h-dvh w-full grid-cols-1 lg:h-dvh lg:min-h-0 lg:grid-cols-[55fr_45fr] lg:overflow-hidden">
+            {/* Brand panel */}
 
-            <section className="relative isolate flex min-h-0 flex-col justify-between overflow-hidden border-b border-(--color-border-strong) bg-[#15120e] px-7 py-5 sm:px-12 sm:py-7 lg:h-dvh lg:border-b-0 lg:border-r lg:px-14 lg:py-10 xl:px-20 xl:py-12">
+            <section className="relative isolate flex min-w-0 flex-col justify-between overflow-hidden border-b border-(--color-border-strong) bg-[#15120e] px-6 py-6 sm:px-12 sm:py-8 lg:h-dvh lg:min-h-0 lg:border-b-0 lg:border-r lg:px-14 lg:py-10 xl:px-20 xl:py-12">
                 <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_18%_18%,rgba(194,151,81,0.19),transparent_42%),radial-gradient(ellipse_at_85%_80%,rgba(112,77,37,0.16),transparent_45%),linear-gradient(145deg,#1b1812_0%,#100f0d_48%,#080807_100%)]" />
 
                 <div className="pointer-events-none absolute -right-32 top-1/4 -z-10 h-[420px] w-[420px] rounded-full border border-[#c6a46b]/10" />
@@ -48,12 +48,12 @@ export function AuthPageLayout({
 
                 {/* Main message */}
 
-                <div className="relative my-4 max-w-2xl lg:my-auto lg:py-10">
+                <div className="relative my-7 max-w-2xl sm:my-9 lg:my-auto lg:py-10">
                     <p className="mb-3 font-body text-[9px] font-bold uppercase tracking-[0.28em] text-(--color-gold) sm:mb-5">
                         {eyebrow}
                     </p>
 
-                    <h1 className="font-display text-3xl font-medium leading-[1.05] tracking-tight text-[#e9d9bd] sm:text-5xl lg:text-6xl xl:text-7xl">
+                    <h1 className="max-w-2xl break-words font-display text-3xl font-medium leading-[1.05] tracking-tight text-[#e9d9bd] sm:text-5xl lg:text-6xl xl:text-7xl">
                         {title}
                     </h1>
 
@@ -77,22 +77,22 @@ export function AuthPageLayout({
                 </div>
             </section>
 
-            {/* Form panel - independently scrollable */}
+            {/* Form panel */}
 
             <section
-                className={`relative flex h-dvh min-h-0 min-w-0 flex-col bg-(--color-background) ${
+                className={`relative flex min-h-0 min-w-0 flex-col bg-(--color-background) lg:h-dvh ${
                     formScrollable
-                        ? 'overflow-y-auto overscroll-y-contain'
-                        : 'overflow-hidden'
+                        ? 'overflow-visible lg:overflow-y-auto lg:overscroll-y-contain'
+                        : 'overflow-visible lg:overflow-hidden'
                 }`}
             >
                 <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 bg-[radial-gradient(circle,rgba(190,151,87,0.055),transparent_70%)]" />
 
                 <div
-                    className={`relative mx-auto flex w-[90%] max-w-none flex-1 flex-col justify-center px-0 ${
+                    className={`relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 sm:px-10 lg:w-[90%] lg:px-0 ${
                         formScrollable
-                            ? 'py-8 sm:py-10'
-                            : 'py-5 sm:py-7'
+                            ? 'py-8 sm:py-10 lg:py-10'
+                            : 'py-7 sm:py-9 lg:py-5'
                     }`}
                 >
                     <div className="mb-5 sm:mb-7">
